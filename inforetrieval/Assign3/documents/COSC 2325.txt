@@ -1,0 +1,3 @@
+COSC 2325: Foundations of Computer Information Systems
+This course provides a thorough introduction to graphical user interface programming using visual programming tools. After this course students will be proficient in developing Windows programs. Offered every fall and spring.
+Prerequisites: COSC 1310, COSC 1336/1136.

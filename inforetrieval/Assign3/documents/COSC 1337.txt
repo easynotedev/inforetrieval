@@ -1,0 +1,5 @@
+COSC 1337: The Object-Oriented Paradigm [with COSC 1137=TCCN: COSC 1437]
+Introduces the concepts of object-oriented programming to students with a background
+in the procedural paradigm. Topics covered include a review of control structures and
+data types, the object-oriented programming paradigm, object-oriented design, an overview of programming language principles, simple analysis of algorithms, basic searching and sorting techniques, secure programming techniques, and an introduction to software engineering issues. Offered every fall, spring and summer. Concurrent enrollment in COSC 1137 required.
+Prerequisites: COSC 1336/1136.

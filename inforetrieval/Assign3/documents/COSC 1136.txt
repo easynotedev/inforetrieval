@@ -1,0 +1,2 @@
+COSC 1136: Programming Fundamentals Laboratory
+Laboratory sessions dealing with the fundamental concepts of procedural programming. Topics include data types, control structures, functions, arrays, files, secure programming, and the mechanics of running, testing, and debugging. Offered every fall, spring and summer. Concurrent enrollment in COSC 1336 required.

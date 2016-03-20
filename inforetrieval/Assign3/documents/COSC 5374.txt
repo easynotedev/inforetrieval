@@ -1,0 +1,4 @@
+COSC 5374: Software Architecture
+Concepts and methodologies for the systematic analysis, development, evolution, and reuse of software architectures. Understanding the elements of software architectures including components, connectors, styles, patterns, and constraints. Developing software architectures from functional requirements. Evaluation and selection of alternative software architectures based on non-functional requirements. State of
+the practice and art. Offered in spring of odd years.
+Prerequisite: COSC 2336 or equivalent.

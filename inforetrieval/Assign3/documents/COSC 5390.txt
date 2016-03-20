@@ -1,0 +1,3 @@
+COSC 5390: Topics in Computer Science
+This course can be taken up to two times for credit when content changes. Offered every fall, spring and summer.
+Prerequisites: COSC 2315, COSC 2336.

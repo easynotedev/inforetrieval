@@ -1,0 +1,3 @@
+COSC 2315: Computer Organization Introduces the concept of computers and
+information systems by presenting the process of computation as a hierarchy of virtual machines, beginning with the hardware and moving upward through various levels of increasingly sophisticated software. Offered every spring.
+Prerequisites: COSC 1336/1136, MATH 1314, 1324 or 2330.

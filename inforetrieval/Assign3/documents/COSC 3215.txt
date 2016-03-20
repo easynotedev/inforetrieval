@@ -1,0 +1,4 @@
+COSC 3315: Social and Professional Issues in Computing
+Introduction to the social and professional issues that arise in the context of computing.
+Offered every fall.
+Prerequisites: COSC 1337/1137.

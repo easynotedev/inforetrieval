@@ -1,0 +1,4 @@
+MATH 2113: Calculus I Computer Lab
+
+Calculus I concepts illustrated and expanded through the use of a computer algebra system. Graphing and symbolic and numerical computations will be emphasized. Co-requisite: MATH 2413.
+

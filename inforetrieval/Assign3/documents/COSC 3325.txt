@@ -1,0 +1,4 @@
+COSC 3325: Algorithm Design and Analysis
+Introduction to formal techniques used to support the design and analysis of algorithms,
+focusing on both the underlying mathematical theory and practical considerations of efficiency. Topics include asymptotic complexity bounds, techniques of analysis, algorithmic strategies, and an introduction to automata theory and its application to language translation. Offered every fall.
+Prerequisite: COSC 2336.

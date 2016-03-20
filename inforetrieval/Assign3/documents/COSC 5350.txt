@@ -1,0 +1,5 @@
+COSC 5350: Data Communication and Networks
+An introduction to data communications and networking. Covers the architecture, design
+and implementation of computer networks. Topics include data transmission, switching,
+protocols and security. Offered every spring.
+Prerequisites: COSC 2315, COSC 2336.

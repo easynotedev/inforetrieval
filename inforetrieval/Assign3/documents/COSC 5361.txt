@@ -1,0 +1,5 @@
+COSC 5361: Digital Image Processing
+Basic concepts in Digital Image Processing. Topics include two-dimensional transforms,
+filtering, enhancement, restoration, edge detection, segmentation, texture, matching,
+image representation, feature detection, and their application. Offered in fall of odd years.
+Prerequisites: COSC 2315, COSC 2336.

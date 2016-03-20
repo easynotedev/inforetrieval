@@ -55,6 +55,8 @@ use File::Spec;
 #use current working directory
 use Cwd;
 use Cwd 'abs_path';
+#debugging tool, makes it easier to print ARRAY & HASH
+use Data::Dumper;
 
 #The catdir method of the File::Spec module/class can concatenate parts of a file-system path in a platform specific way. 
 #Because $0 might contain just the name of the script we first need to ask the currently running perl to calculate the absolute path.
@@ -76,6 +78,7 @@ my %INFILEHASH;
 my @DOCID;
 my $nmeofstoplist='';
 my $nameofstoplist='';
+
 
 #Manipulates Array DOCID, and Hash INFILEHASH
 #A specific methods happens to the stoplist file
@@ -124,25 +127,41 @@ print abs_path($0)."\n\n";
 #below is if I would need to convert backslash into forwardslash, # is a delimeter in the substitution function
 #$LOCINLES =~ s#\\#\\\\#g;
 print "Enter absolute path of data files> ";
-chomp(my $LOCDAILE = <STDIN>);
-#stoplist filename
-my $stplst_filenm = basename($LOCSTIST);
-#different to nmeofstoplist,this is for a check in readfile, so stoplist doc does not save to the TOKEN HASH
-$nmeofstoplist=$stplst_filenm;
-$nmeofstoplist =~ s/.txt$//;
-$nmeofstoplist =~ s/\s//;
+chomp(my $LOCDATFIL = <STDIN>);
 
-readfiletohash("$LOCSTIST","$stplst_filenm");
+#Although Unix's Forward-slash constrasts Win's Back-slash superficially, 
+#looks aside, perl knows that it could associate them together as they are one and the same
+#Open location of input directory
+#opendir my $DIR_HANDLE,"$LOCINLES" or die "Unable to open directory : $!";
+opendir my $DIR_HANDLE,"$LOCDATFIL" or die "Unable to open directory : $!";
+#Open location of input directory
+#Access all **.txt files from DIR/location and put each into GLOBALHASH INFILE as KEYS
+    # (^assert position at start of the string)(.+ matches any character (except newline))
+    # Quantifier: + Between one and unlimited times, as many times as possible, 
+    # txt matches the characters txt literally (case sensitive) (assert position at end of the string$)
+my @DOCTXTID= grep(/^.+.txt$/,readdir($DIR_HANDLE));
+
+closedir $DIR_HANDLE;
+
+#NUMBER OF DOCUMENT VECTOR
+my $docno=0;
+foreach my $file_name (@DOCTXTID)
+{
+    $docno++;
+    #on each access of a **.txt file, do below
+    readfiletohash("$LOCDATFIL/$file_name",$file_name);
+}#END foreach
+
+print Dumper \%INFILEHASH;
+print $docno;
 print "\n";
-printf "stop words : %s", $nameofstoplist;
-print "\n\n";
-print "Enter absolute path of input DIRECTORY, location of input files> ";
-chomp(my $LOCINLES = <STDIN>);
+print "Enter absolute path of Query document> ";
+chomp(my $LOCQUEFIL = <STDIN>);
 #negates the new-line char
 print "\n";
 print "e.i. output file must be an absolute DIRECTORY location";
 print "\n";
-print "Enter desired location of file output.txt> ";
-chomp(my $LOCOUPUT = <STDIN>);
+print "How many similar document should I return> ";
+chomp(my $K = <STDIN>);
 
 __END__

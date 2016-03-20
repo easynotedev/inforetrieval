@@ -1,0 +1,3 @@
+COSC 1336: Programming Fundamentals [with COSC 1136=TCCN: COSC 1436]
+Introduces the fundamental concepts of procedural programming. Topics include data types, control structures, functions, arrays, files, secure programming, and the mechanics of running, testing, and debugging. The course also offers an introduction to the historical and social context of computing and an overview of computer science
+as a discipline. Offered every fall, spring and summer. Concurrent enrollment in COSC 1136 required.

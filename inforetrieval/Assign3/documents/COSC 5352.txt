@@ -1,0 +1,5 @@
+COSC 5352: Client/Server Architectures
+Design and implementation of client/server systems. Topics include: network protocols,
+OLE DGE, CORBA, server design and implementation and tightly integrated message
+systems. Offered in summer of odd years.
+Prerequisites: COSC 2315, COSC 2336.

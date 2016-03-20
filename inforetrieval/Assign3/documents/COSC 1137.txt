@@ -1,0 +1,2 @@
+COSC 1137: The Object-Oriented Paradigm Laboratory
+Experiments with software development for topics such as control structures and data types, the object-oriented programming paradigm, object-oriented design, an overview of programming language principles, simple analysis of algorithms, basic searching and sorting techniques, secure programming techniques, and an introduction to software engineering issues. Offered every fall, spring and summer. Concurrent enrollment in COSC 1337 required.

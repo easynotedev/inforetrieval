@@ -1,0 +1,4 @@
+MATH 3404: Multivariate Calculus
+
+Vector calculus in Euclidean n-space, functions of several variables, partial differentiation and multiple integration. Co-requisite: Mathematics majors must concurrently take MATH 3104. Prerequisite: MATH 2414.
+

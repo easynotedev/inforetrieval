@@ -1,0 +1,3 @@
+COSC 3345: Computer Architecture
+Introduces students to the organization and architecture of computer systems, beginning with the standard von Neumann model and then moving forward to more recent architectural concepts. Offered every fall. Concurrent enrollment in COSC 3145 required.
+Prerequisite: COSC 2336 and COSC 2315.

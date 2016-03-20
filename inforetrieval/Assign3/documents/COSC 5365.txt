@@ -1,0 +1,4 @@
+COSC 5365: Artificial Intelligence
+Introduction to the basic concepts of artificial intelligence. Topics covered will include
+knowledge representation, A.I. programming, learning, and neural nets. Offered in spring of even years.
+Prerequisites: COSC 2315, COSC 2336.

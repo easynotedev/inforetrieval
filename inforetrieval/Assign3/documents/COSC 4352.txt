@@ -1,0 +1,3 @@
+COSC 4352: Data Mining
+The course deals with knowledge discovery from databases (KDD). Topics covered in the course include data warehouse, model fitting, classification, prediction, clustering, market basket analysis, extracting knowledge from data models, and data visualization techniques. Offered in fall of odd years.
+Prerequisite: COSC 2336.

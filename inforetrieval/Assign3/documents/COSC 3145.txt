@@ -1,0 +1,2 @@
+COSC 3145: Computer Architecture Laboratory
+Experiments in digital systems and computer architecture. Students will build and test logic circuits such as an adder, a multiplexer, arithmetic and logic unit, a counter, a shift register, and a memory unit. Students will also study hardware subsystems of a computer such as buses, central processing unit (CPU), and input/output systems. Offered every fall. Concurrent enrollment in COSC 3345 required.

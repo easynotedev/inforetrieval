@@ -1,0 +1,5 @@
+COSC 5336: Local Area Networks
+LAN architectures and media. In addition, course will cover inter-networking,
+performance, and design issues. Special attention will be paid to IEEE 802 and all
+current systems.
+Prerequisites: COSC 2315, COSC 2336.

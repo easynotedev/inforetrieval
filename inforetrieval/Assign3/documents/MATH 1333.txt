@@ -1,0 +1,4 @@
+MATH 1333: Contemporary Mathematics II [TCCN: MATH 1333]
+
+Topics may include statistics, probability, combinatorics, game theory, voting theory, and mathematics of finance. Prerequisite: MATH 1314, MATH 1324, or MATH 1332.
+

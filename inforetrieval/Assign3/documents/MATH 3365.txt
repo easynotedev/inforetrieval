@@ -1,0 +1,4 @@
+MATH 3365: Geometric Systems
+
+Study of Euclidean and non-Euclidean geometries. Prerequisite: MATH 3425.
+

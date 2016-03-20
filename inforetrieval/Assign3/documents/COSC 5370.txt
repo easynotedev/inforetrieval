@@ -1,0 +1,4 @@
+COSC 5370: Software Engineering
+Program development techniques with structured methodologies. Top-down development, modeling tools, structured programming, programming style, program
+testing and debugging. Offered in fall of even years.
+Prerequisites: COSC 2315, COSC 2336.

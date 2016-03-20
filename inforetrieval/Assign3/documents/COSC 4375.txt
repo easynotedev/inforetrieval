@@ -1,0 +1,3 @@
+COSC 4375: Information Systems Design Project
+An integrated perspective of the problems in today’s information systems environment, concentration on contemporary design, methodologies, and considerations unique to users of computers and information systems. Offered every fall.
+Prerequisites: GENB 3301 or COSC 3315, COSC1337/1137, COSC 3385.

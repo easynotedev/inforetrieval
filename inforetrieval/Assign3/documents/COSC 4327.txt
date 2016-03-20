@@ -1,0 +1,5 @@
+COSC 4327: UNIX Shell Programming
+Introduction to programming in the UNIX Shell; directory structure and file manipulation,
+built-in functions, control structures, utilities, and sublanguages. Offered in spring of odd
+years.
+Prerequisite: COSC 2336.

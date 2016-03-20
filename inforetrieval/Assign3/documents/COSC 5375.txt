@@ -1,0 +1,3 @@
+COSC 5375: Advanced Database Design
+Database design issues including: query processing, interpretation, optimization, and
+methods for implementing and optimizing logic queries. Knowledge databases, distributed databases, and object-oriented databases. Offered in spring of odd years. Prerequisites: COSC 5360.

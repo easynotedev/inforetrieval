@@ -1,0 +1,3 @@
+COSC 4325: Data Communications and Computer Networks
+Study of problems and limitations associated with interconnecting computers by communication networks. OSI reference model, architecture of circuits, message and packet switching networks, network topology, routing, flow control, capacity assignments, protocols, coding and multiplexing. Offered every fall.
+Prerequisite: COSC 2315.

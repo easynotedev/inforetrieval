@@ -1,0 +1,4 @@
+COSC 5362: Pattern Recognition
+Various stages in a recognition system and their design will be discussed. Topics include: preprocessing, feature extraction, recognition, knowledge base, and associative storage. Algorithms and implementation of these stages will be discussed. Practical applications such as character recognition, satellite image analysis, MRI data analysis, and other biomedical applications will be discussed. Offered in spring
+of even years.
+Prerequisites: COSC 2315,COSC 2336.

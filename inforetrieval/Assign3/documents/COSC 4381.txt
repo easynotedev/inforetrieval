@@ -1,0 +1,3 @@
+COSC 4381: Seminar in Computer Science
+This course is designed to study current trends in computer science. Offered spring of odd years.
+Prerequisite: Senior classification in computer science.

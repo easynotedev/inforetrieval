@@ -1,0 +1,4 @@
+MATH 1324: Mathematics for Business and Economics I [TCCN: MATH 1324]
+
+Topics include review of basic algebraic concepts, linear equations and inequalities, mathematics of finance, matrices, introduction to linear programming, topics in probability. Prerequisite: Satisfactory score on SAT, ACT, or THEA. Credit not given for both MATH 1324 and MATH 1314 or MATH 1332.
+
