@@ -76,13 +76,15 @@ use Lib File::Spec->catdir(dirname('$path'),'..','Lib');
 
 my %INFILEHASH;
 my @DOCID;
-my $nmeofstoplist='';
-my $nameofstoplist='';
+my $query='';
+my $notxtquery='';
 
 
+#Read file and put to HASH or
+#if file is query save as query file
 #Manipulates Array DOCID, and Hash INFILEHASH
-#A specific methods happens to the stoplist file
-sub readfiletohash
+#A specific methods happens to the query file
+sub readfileto
 {
     my $PATH = shift;
     my $filenm = shift;
@@ -99,15 +101,16 @@ sub readfiletohash
     #USED Substitute function .txt(end) -> null to
     #TRIM / ELIMINATES .txt in DOCID's
     $filenm =~ s/.txt$//;
-    #USED Sbustitute function to delete whitespace(s/) ->(becomes) null
+    #USED Substitute function to delete whitespace(s/) ->(becomes) null
     $filenm =~ s/\s//;
-    #saves the (Array of string / text-body of a file) to the appropriate key in the GlobalHASH
-    if($filenm eq $nmeofstoplist)
+    #if QUERY FILE
+    if($filenm eq $notxtquery)
     {
-        $nameofstoplist = $filenm; 
-        $nameofstoplist = "@filedy";
+        $query = $filenm; 
+        $query = "@filedy";
     }
     #if an input file
+    #saves the (Array of string / text-body of a file) to the appropriate key in the GlobalHASH
     else
     {
         $INFILEHASH{$filenm} = "@filedy";
@@ -122,10 +125,7 @@ sub readfiletohash
 print "script's path : ";
 print abs_path($0)."\n\n";
 
-
-
-#below is if I would need to convert backslash into forwardslash, # is a delimeter in the substitution function
-#$LOCINLES =~ s#\\#\\\\#g;
+#negates the new-line char
 print "Enter absolute path of data files> ";
 chomp(my $LOCDATFIL = <STDIN>);
 
@@ -149,19 +149,28 @@ foreach my $file_name (@DOCTXTID)
 {
     $docno++;
     #on each access of a **.txt file, do below
-    readfiletohash("$LOCDATFIL/$file_name",$file_name);
+    readfileto("$LOCDATFIL/$file_name",$file_name);
 }#END foreach
 
 print Dumper \%INFILEHASH;
-print $docno;
+
 print "\n";
 print "Enter absolute path of Query document> ";
 chomp(my $LOCQUEFIL = <STDIN>);
-#negates the new-line char
-print "\n";
-print "e.i. output file must be an absolute DIRECTORY location";
+#stoplist filename
+my $query_filenm = basename($LOCQUEFIL);
+#different to nmeofstoplist,this is for a check in readfile, so stoplist doc does not save to the TOKEN HASH
+$notxtquery = $query_filenm;
+$notxtquery =~ s/.txt$//;
+$notxtquery =~ s/\s//;
+
+readfileto($LOCQUEFIL, $query_filenm);
+print $query;
+
 print "\n";
 print "How many similar document should I return> ";
 chomp(my $K = <STDIN>);
+print "\n";
+printf "K is: %s",$K;
 
 __END__
