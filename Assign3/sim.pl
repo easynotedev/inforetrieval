@@ -11,38 +11,12 @@ Date          : 3/20/2016
 
 =pod
 
-=head2 ASSUMPTIONS
-       : data files are .txt files
-       : location of the query is in a hierarchical file-system
-       : Three input items, are necessary for this program to be graded
-       : Does not need a stoplist
-=cut
-
-=pod
-
 =head1 DESCRIPTION
        : First input/prompt is the location of the data files
        : Second input/prompt is the location of the query document (Q)
        : Third input/prompt is the number of documents the system should return (K)
        : System should find and return the K documents that are the most similar to Q
        : K Documents are to be sorted in order, From most Similar to Least similar
-=cut
-
-=pod
-
-=head2 Accreditation
-       : Sources online made me aware of Perl function such as 
-       : opendir,grep(filename.txt)and save to HASH as key
-       : push a string to an array, HANDLES to open directory or file
-       : sort array by numeric value using spaceship operator
-       : find path using perl's basename function
-       : Multidimensional HASH 
-       : Perl Maven taught me how to change @INC to find Perl modules
-       : in non-standard locations
-       : Adding my understanding of the assignment to these functions
-       : Allowed me to piece together a working program
-       : stackoverflow.com , perldoc.perl.org, perlmonks.org, cpan.org
-       : grateful for Gabor Szabo, Author of perlmaven.com 
 =cut
 
 use 5.18.0;
@@ -57,6 +31,8 @@ use Cwd;
 use Cwd 'abs_path';
 #debugging tool, makes it easier to print ARRAY & HASH
 use Data::Dumper;
+#use experimental 'smartmatch';
+no warnings 'experimental::smartmatch';
 
 #The catdir method of the File::Spec module/class can concatenate parts of a file-system path in a platform specific way. 
 #Because $0 might contain just the name of the script we first need to ask the currently running perl to calculate the absolute path.
@@ -74,7 +50,10 @@ $path = Cwd::abs_path($0);
 #use lib "C:\\Users\\tuffasspc\\Documents\\perl SCRIPTS\\perl_project\\Lib";
 use Lib File::Spec->catdir(dirname('$path'),'..','Lib');
 
+use Lib::Mistemming;
+
 my %INFILEHASH;
+my %UNSTMWORDHASH;
 my @DOCID;
 my $query='';
 my $notxtquery='';
@@ -115,7 +94,6 @@ sub readfileto
     {
         $INFILEHASH{$filenm} = "@filedy";
         push @DOCID, "$filenm";
-
     }
 }
 
@@ -152,7 +130,17 @@ foreach my $file_name (@DOCTXTID)
     readfileto("$LOCDATFIL/$file_name",$file_name);
 }#END foreach
 
-print Dumper \%INFILEHASH;
+
+foreach my $file_name (@DOCID)
+{
+	my @bodyofword = split / /, $INFILEHASH{$file_name};
+    foreach my $word(@bodyofword)
+    {
+        #perldoc Mistemming.pm
+        $word=mistemming($word);
+        $UNSTMWORDHASH{lc $word} = defined;
+    }
+}
 
 print "\n";
 print "Enter absolute path of Query document> ";
@@ -171,5 +159,31 @@ print "\n";
 print "Number of similar documents to display> ";
 chomp(my $K = <STDIN>);
 printf "K is: %s",$K;
-
+print "\n";
+system("pause");
 __END__
+
+=pod
+=head2 ASSUMPTIONS
+       : data files are .txt files
+       : location of the query is in a hierarchical file-system
+       : Three input items, are necessary for this program to be graded
+       : Does not need a stoplist
+=cut
+
+=pod
+=head2 Accreditation
+       : Sources online made me aware of Perl function such as 
+       : opendir,grep(filename.txt)and save to HASH as key
+       : push a string to an array, HANDLES to open directory or file
+       : sort array by numeric value using spaceship operator
+       : find path using perl's basename function
+       : Multidimensional HASH
+       : Perl's Smartmatch operator
+       : Perl Maven taught me how to change @INC to find Perl modules
+       : in non-standard locations
+       : Adding my understanding of the assignment to these functions
+       : Allowed me to piece together a working program
+       : stackoverflow.com , perldoc.perl.org, perlmonks.org, cpan.org
+       : grateful for Gabor Szabo, Author of perlmaven.com 
+=cut
