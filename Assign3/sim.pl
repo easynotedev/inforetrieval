@@ -168,9 +168,8 @@ readfileto($LOCQUEFIL, $query_filenm);
 print $query;
 
 print "\n";
-print "How many similar document should I return> ";
+print "Number of similar documents to display> ";
 chomp(my $K = <STDIN>);
-print "\n";
 printf "K is: %s",$K;
 
 __END__
