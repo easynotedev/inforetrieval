@@ -161,8 +161,8 @@ chomp(my $K = <STDIN>);
 printf "K is: %s",$K;
 print "\n";
 system("pause");
-__END__
 
+__END__
 =pod
 =head2 ASSUMPTIONS
        : data files are .txt files

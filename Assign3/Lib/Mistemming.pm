@@ -79,3 +79,22 @@ return $bow;
 }
 
 66;
+__END__
+
+=head1 TITLE
+Name          : sim.pl
+Author        : Antonin Karlo M. Tilaon
+Version       : 1
+=cut
+
+=pod
+
+=head2 DESCRIPTION
+        : Deletes word casings.
+        : Deletes from the left, aswell as the right.
+        : e.g. string = {[(shell)]}  shell = mistemming(string)
+        : It also ignores word that are symbol [, +, -, 
+        : and single white-space
+=cut
+
+=pod
