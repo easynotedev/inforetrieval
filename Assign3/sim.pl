@@ -51,18 +51,19 @@ $path = Cwd::abs_path($0);
 use Lib File::Spec->catdir(dirname('$path'),'..','Lib');
 
 use Lib::Mistemming;
+use Lib::Porterstemmer;
 
-my %INFILEHASH;
-my %UNSTMWORDHASH;
-my @DOCID;
-my $query='';
-my $notxtquery='';
-
+#initialze the stoplist instead of an input file
+my @stoplist = ("the","be","to","and","a","in","that","have","it","for","not","on","with","do","at","from");
 
 #Read file and put to HASH or
 #if file is query save as query file
 #Manipulates Array DOCID, and Hash INFILEHASH
+my %INFILEHASH;
+my @DATAID;
 #A specific methods happens to the query file
+my $query='';
+my $notxtquery='';
 sub readfileto
 {
     my $PATH = shift;
@@ -93,7 +94,7 @@ sub readfileto
     else
     {
         $INFILEHASH{$filenm} = "@filedy";
-        push @DOCID, "$filenm";
+        push @DATAID, "$filenm";
     }
 }
 
@@ -130,17 +131,54 @@ foreach my $file_name (@DOCTXTID)
     readfileto("$LOCDATFIL/$file_name",$file_name);
 }#END foreach
 
+#INIT PORTER STEMMER
+initialiseporter();
+#HASH FOR TOKEN
+my %TOKENHASH;
+#HASH FOR TERMS IN A DATAFILE
+my %TOTNURMS;
 
-foreach my $file_name (@DOCID)
+foreach my $file_name (@DATAID)
 {
 	my @bodyofword = split / /, $INFILEHASH{$file_name};
+	#counter for terms in a document/how many terms in a Document?
+    my $ctr=0;
     foreach my $word(@bodyofword)
     {
+        #TOTNURMS HASH counter
+        $ctr++;
         #perldoc Mistemming.pm
         $word=mistemming($word);
-        $UNSTMWORDHASH{lc $word} = defined;
+        #used perl's smartmatching (~~, if matches an element in stoplist 
+        #consider stop word irrelevant
+        #program only checks lowercased strings/word
+        if(lc $word ~~ @stoplist){}
+        
+        #DO NOTHING-S
+        elsif(lc $word ~~ "&"){}
+        elsif(lc $word ~~ "("){}
+        elsif(lc $word ~~ "["){}
+        elsif(lc $word ~~ "+"){}
+        elsif(lc $word ~~ "-"){}
+        elsif(lc $word ~~ ""){}
+        elsif(lc $word ~~ " "){}
+        #END of DO NOTHING-S    
+            
+        else
+        {
+            #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
+            #TOKENS are NORMALIZED terms
+            my $word = stem(lc $word);
+            #Use TOKEN as key of a HASH, and INITIALIZE its value to defined
+            $TOKENHASH{$word} = defined; 
+        }
+    #STORE THE TOTAL NO. of TERMS for each DOCUMENT in a HASH;these are unstemmed and unnormalized
+    $TOTNURMS{$file_name}=$ctr;
     }
 }
+
+#print Dumper\%TOTNURMS;
+#print Dumper\%TOKENHASH;
 
 print "\n";
 print "Enter absolute path of Query document> ";
@@ -150,7 +188,7 @@ my $query_filenm = basename($LOCQUEFIL);
 #different to nmeofstoplist,this is for a check in readfile, so stoplist doc does not save to the TOKEN HASH
 $notxtquery = $query_filenm;
 $notxtquery =~ s/.txt$//;
-$notxtquery =~ s/\s//;
+$notxtquery =~ s/\s//;  
 
 readfileto($LOCQUEFIL, $query_filenm);
 print $query;
@@ -159,6 +197,12 @@ print "\n";
 print "Number of similar documents to display> ";
 chomp(my $K = <STDIN>);
 printf "K is: %s",$K;
+
+################################### CREATE TOKENS FROM DOCUMENT FILES USING HASH ###################################
+print "\nProcessing ..  \n";
+#In this case using HASH is convenient since the INVERTED INDEX require unique tokens, although with frequencies
+
+
 print "\n";
 system("pause");
 
@@ -168,7 +212,7 @@ __END__
        : data files are .txt files
        : location of the query is in a hierarchical file-system
        : Three input items, are necessary for this program to be graded
-       : Does not need a stoplist
+       : Stoplist is initialize inside the script
 =cut
 
 =pod
