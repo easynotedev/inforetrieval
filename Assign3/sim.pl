@@ -11,38 +11,12 @@ Date          : 3/20/2016
 
 =pod
 
-=head2 ASSUMPTIONS
-       : data files are .txt files
-       : location of the query is in a hierarchical file-system
-       : Three input items, are necessary for this program to be graded
-       : Does not need a stoplist
-=cut
-
-=pod
-
 =head1 DESCRIPTION
        : First input/prompt is the location of the data files
        : Second input/prompt is the location of the query document (Q)
        : Third input/prompt is the number of documents the system should return (K)
        : System should find and return the K documents that are the most similar to Q
        : K Documents are to be sorted in order, From most Similar to Least similar
-=cut
-
-=pod
-
-=head2 Accreditation
-       : Sources online made me aware of Perl function such as 
-       : opendir,grep(filename.txt)and save to HASH as key
-       : push a string to an array, HANDLES to open directory or file
-       : sort array by numeric value using spaceship operator
-       : find path using perl's basename function
-       : Multidimensional HASH 
-       : Perl Maven taught me how to change @INC to find Perl modules
-       : in non-standard locations
-       : Adding my understanding of the assignment to these functions
-       : Allowed me to piece together a working program
-       : stackoverflow.com , perldoc.perl.org, perlmonks.org, cpan.org
-       : grateful for Gabor Szabo, Author of perlmaven.com 
 =cut
 
 use 5.18.0;
@@ -57,6 +31,8 @@ use Cwd;
 use Cwd 'abs_path';
 #debugging tool, makes it easier to print ARRAY & HASH
 use Data::Dumper;
+#use experimental 'smartmatch';
+no warnings 'experimental::smartmatch';
 
 #The catdir method of the File::Spec module/class can concatenate parts of a file-system path in a platform specific way. 
 #Because $0 might contain just the name of the script we first need to ask the currently running perl to calculate the absolute path.
@@ -74,16 +50,18 @@ $path = Cwd::abs_path($0);
 #use lib "C:\\Users\\tuffasspc\\Documents\\perl SCRIPTS\\perl_project\\Lib";
 use Lib File::Spec->catdir(dirname('$path'),'..','Lib');
 
-my %INFILEHASH;
-my @DOCID;
-my $query='';
-my $notxtquery='';
+use Lib::Mistemming;
+use Lib::Porterstemmer;
 
 
 #Read file and put to HASH or
 #if file is query save as query file
 #Manipulates Array DOCID, and Hash INFILEHASH
+#DOCID is the key of INFILEHASH, without the suffix .txt
+my %INFILEHASH;
 #A specific methods happens to the query file
+my $query='';
+my $notxtquery='';
 sub readfileto
 {
     my $PATH = shift;
@@ -114,8 +92,6 @@ sub readfileto
     else
     {
         $INFILEHASH{$filenm} = "@filedy";
-        push @DOCID, "$filenm";
-
     }
 }
 
@@ -152,7 +128,76 @@ foreach my $file_name (@DOCTXTID)
     readfileto("$LOCDATFIL/$file_name",$file_name);
 }#END foreach
 
-print Dumper \%INFILEHASH;
+################################### CREATE TOKEN FROM TERMS IN DATAFILES ###################################
+print "\nCreating TOKENS..  \n";
+#INIT PORTER STEMMER
+initialiseporter();
+#HASH FOR UNSTEMMED DATAFILE content, keys will be DATAID
+my %UNSTMDOCHASH;
+#HASH FOR STEMMED DATAFILE content, keys will be DATAID
+my %STMDOCHASH;
+#HASH FOR TOKEN
+my %TOKENHASH;
+#HASH FOR TERMS IN A DATAFILE
+my %TOTNURMS;
+#A HASH to control the increment of tokens in the documents#A HASH to control the increment of tokens in the documents
+my %FLAGGED=();
+# Token frequency buffer of each Document ID
+#HASH WHICH WILL DETERMINE THE VALUE OF A FREQUENCY, which is CORRELATED to a TOKEN and DOCID
+#This one does not need initialization, initialization happens below (FREQASH..++)
+my %FREQASH=();
+my @arraytxtcatcher=();
+my @arraylinecatcher =();
+
+foreach my $dataf (keys %INFILEHASH)
+{
+	#text-body-buffer value return to null;
+	@arraytxtcatcher=();
+	#PARSE content of a DATAFILE
+	my @bodyofword = split / /, $INFILEHASH{$dataf};
+	#counter for terms in a document/how many terms in a Document?
+    my $ctr=0;
+    foreach my $word(@bodyofword)
+    {
+        #text-line-buffer value return to null;
+        @arraylinecatcher =();
+        #TOTNURMS HASH counter
+        $ctr++;
+        #perldoc Mistemming.pm
+        my $maybewords = mistemming($word);
+        #program will do nothing if $maybewords is UNDEFINED
+        if(defined $maybewords)
+        { 
+	        #for each word in a word (this iterates if word is hypenated)
+	        my @maybewords = split / /, $maybewords;
+	        foreach my $word (@maybewords)
+	        {        
+		       #Use TOKEN as key of a HASH, and INITIALIZE its value to defined
+		      
+		           #STORE THE TOTAL NO. of TERMS for each DOCUMENT in a HASH;these are unstemmed and unnormalized
+	               $TOTNURMS{$dataf}=$ctr;
+		           #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
+	               #TOKENS are NORMALIZED terms
+	               my $tok = stem(lc $word);
+		           $FLAGGED{$tok} = defined;
+		           #IF & ELSIF DETERMINES FREQUENCY OF a TOKEN IN THE DOCUMENTS
+	               #DOCUMENT FREQUENCY
+	               if($FLAGGED{$tok} ne $dataf)
+	               {
+	                   $TOKENHASH{$tok}++; 
+	                   $FLAGGED{$tok} = $dataf;
+	               }
+		           push @arraylinecatcher, "$tok";  
+	        }
+	   push @arraytxtcatcher,"@arraylinecatcher";
+	   }#END IF word defined
+    }#END for each word in body of word
+    $STMDOCHASH{$dataf} = "@arraytxtcatcher";
+}#END for each datafile
+
+#print Dumper\%TOTNURMS;
+print Dumper\%TOKENHASH;
+#print Dumper\%STMDOCHASH;
 
 print "\n";
 print "Enter absolute path of Query document> ";
@@ -162,7 +207,7 @@ my $query_filenm = basename($LOCQUEFIL);
 #different to nmeofstoplist,this is for a check in readfile, so stoplist doc does not save to the TOKEN HASH
 $notxtquery = $query_filenm;
 $notxtquery =~ s/.txt$//;
-$notxtquery =~ s/\s//;
+$notxtquery =~ s/\s//;  
 
 readfileto($LOCQUEFIL, $query_filenm);
 print $query;
@@ -172,4 +217,38 @@ print "Number of similar documents to display> ";
 chomp(my $K = <STDIN>);
 printf "K is: %s",$K;
 
+print "\n";
+system("pause");
+
 __END__
+=pod
+=head2 ASSUMPTIONS
+       : data files are .txt files
+       : location of the query is in a hierarchical file-system
+       : Three input items, are necessary for this program to be graded
+=cut
+
+=pod
+=head2 SPECIFICS
+       : Stoplist is initialize inside the script
+       : Used Perl's smartmatch ~~ to determine if a word a stop word
+       : Store TOKEN into a HASH %TOKENHASH
+       : Store No. of terms for each Data file in a HASH %TOTNURMS
+=cut
+
+=pod
+=head2 Accreditation
+       : Sources online made me aware of Perl function such as 
+       : opendir,grep(filename.txt)and save to HASH as key
+       : push a string to an array, HANDLES to open directory or file
+       : sort array by numeric value using spaceship operator
+       : find path using perl's basename function
+       : Multidimensional HASH
+       : Perl's Smartmatch operator
+       : Perl Maven taught me how to change @INC to find Perl modules
+       : in non-standard locations
+       : Adding my understanding of the assignment to these functions
+       : Allowed me to piece together a working program
+       : stackoverflow.com , perldoc.perl.org, perlmonks.org, cpan.org
+       : grateful for Gabor Szabo, Author of perlmaven.com 
+=cut
