@@ -75,6 +75,25 @@ sub mistemming
             chop($bow);
         }
     }#END for
+    
+#initialze the stoplist instead of an input file
+my @stoplist = ("the","be","to","and","a","in","that","have","it","for","not","on","with","do","at","from");
+
+#used perl's smartmatching (~~, if matches an element in stoplist 
+#consider stop word irrelevant
+#program only checks lowercased strings/word
+if(lc $bow ~~ @stoplist){return undef}
+     
+#DO NOTHING-S
+elsif(lc $bow ~~ "&"){return undef}
+elsif(lc $bow ~~ "("){return undef}
+elsif(lc $bow ~~ "["){return undef}
+elsif(lc $bow ~~ "+"){return undef}
+elsif(lc $bow ~~ "-"){return undef}
+elsif(lc $bow ~~ ""){return undef}
+elsif(lc $bow ~~ " "){return undef}
+#END of DO NOTHING-S    
+             
 return $bow;
 }
 
@@ -93,7 +112,7 @@ Version       : 1
         : Deletes word casings.
         : Deletes from the left, aswell as the right.
         : e.g. string = {[(shell)]}  shell = mistemming(string)
-        : It also ignores word that are symbol [, +, -, 
+        : It also ignores a word that is a symbol [, +, -, 
         : and single white-space
 =cut
 

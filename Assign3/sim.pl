@@ -53,14 +53,12 @@ use Lib File::Spec->catdir(dirname('$path'),'..','Lib');
 use Lib::Mistemming;
 use Lib::Porterstemmer;
 
-#initialze the stoplist instead of an input file
-my @stoplist = ("the","be","to","and","a","in","that","have","it","for","not","on","with","do","at","from");
 
 #Read file and put to HASH or
 #if file is query save as query file
 #Manipulates Array DOCID, and Hash INFILEHASH
+#DOCID is the key of INFILEHASH, without the suffix .txt
 my %INFILEHASH;
-my @DATAID;
 #A specific methods happens to the query file
 my $query='';
 my $notxtquery='';
@@ -94,7 +92,6 @@ sub readfileto
     else
     {
         $INFILEHASH{$filenm} = "@filedy";
-        push @DATAID, "$filenm";
     }
 }
 
@@ -131,54 +128,69 @@ foreach my $file_name (@DOCTXTID)
     readfileto("$LOCDATFIL/$file_name",$file_name);
 }#END foreach
 
+################################### CREATE TOKEN FROM TERMS IN DATAFILES ###################################
+print "\nCreating TOKENS..  \n";
 #INIT PORTER STEMMER
 initialiseporter();
 #HASH FOR TOKEN
 my %TOKENHASH;
+#HASH FOR STEMMED DATAFILE content, keys will be DATAID
+my %STMDOCHASH;
 #HASH FOR TERMS IN A DATAFILE
 my %TOTNURMS;
+#A HASH to control the increment of tokens in the documents#A HASH to control the increment of tokens in the documents
+my %FLAGGED=();
+# Token frequency buffer of each Document ID
+#HASH WHICH WILL DETERMINE THE VALUE OF A FREQUENCY, which is CORRELATED to a TOKEN and DOCID
+#This one does not need initialization, initialization happens below (FREQASH..++)
+my %FREQASH=();
+my @arraytxtcatcher=();
+my @arraylinecatcher =();
 
-foreach my $file_name (@DATAID)
+
+foreach my $dataf (keys %INFILEHASH)
 {
-	my @bodyofword = split / /, $INFILEHASH{$file_name};
+	#text-body-buffer value return to null;
+	@arraytxtcatcher=();
+	my @bodyofword = split / /, $INFILEHASH{$dataf};
 	#counter for terms in a document/how many terms in a Document?
     my $ctr=0;
     foreach my $word(@bodyofword)
     {
+        #text-line-buffer value return to null;
+        @arraylinecatcher =();
         #TOTNURMS HASH counter
         $ctr++;
         #perldoc Mistemming.pm
         $word=mistemming($word);
-        #used perl's smartmatching (~~, if matches an element in stoplist 
-        #consider stop word irrelevant
-        #program only checks lowercased strings/word
-        if(lc $word ~~ @stoplist){}
-        
-        #DO NOTHING-S
-        elsif(lc $word ~~ "&"){}
-        elsif(lc $word ~~ "("){}
-        elsif(lc $word ~~ "["){}
-        elsif(lc $word ~~ "+"){}
-        elsif(lc $word ~~ "-"){}
-        elsif(lc $word ~~ ""){}
-        elsif(lc $word ~~ " "){}
-        #END of DO NOTHING-S    
-            
-        else
-        {
-            #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
+       
+	    #Use TOKEN as key of a HASH, and INITIALIZE its value to defined
+	    if(defined $word)
+	    { 
+	        #STORE THE TOTAL NO. of TERMS for each DOCUMENT in a HASH;these are unstemmed and unnormalized
+            $TOTNURMS{$dataf}=$ctr;
+	        #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
             #TOKENS are NORMALIZED terms
-            my $word = stem(lc $word);
-            #Use TOKEN as key of a HASH, and INITIALIZE its value to defined
-            $TOKENHASH{$word} = defined; 
-        }
-    #STORE THE TOTAL NO. of TERMS for each DOCUMENT in a HASH;these are unstemmed and unnormalized
-    $TOTNURMS{$file_name}=$ctr;
-    }
-}
+            my $tok = stem(lc $word);
+	        $FLAGGED{$tok} = defined;
+	        #IF & ELSIF DETERMINES FREQUENCY OF a TOKEN IN THE DOCUMENTS
+            #DOCUMENT FREQUENCY
+            if($FLAGGED{$tok} ne $dataf)
+            {
+                $TOKENHASH{$tok}++; 
+                $FLAGGED{$tok} = $dataf;
+            }
+            
+	    push @arraylinecatcher, "$tok";    
+	    }#END IF word defined
+	push @arraytxtcatcher,"@arraylinecatcher";
+    }#END for each word in body of word
+    $STMDOCHASH{$dataf} = "@arraytxtcatcher";
+}#END for each datafile
 
-#print Dumper\%TOTNURMS;
-#print Dumper\%TOKENHASH;
+print Dumper\%TOTNURMS;
+print Dumper\%TOKENHASH;
+#print Dumper\%STMDOCHASH;
 
 print "\n";
 print "Enter absolute path of Query document> ";
@@ -198,11 +210,6 @@ print "Number of similar documents to display> ";
 chomp(my $K = <STDIN>);
 printf "K is: %s",$K;
 
-################################### CREATE TOKENS FROM DOCUMENT FILES USING HASH ###################################
-print "\nProcessing ..  \n";
-#In this case using HASH is convenient since the INVERTED INDEX require unique tokens, although with frequencies
-
-
 print "\n";
 system("pause");
 
@@ -212,7 +219,14 @@ __END__
        : data files are .txt files
        : location of the query is in a hierarchical file-system
        : Three input items, are necessary for this program to be graded
+=cut
+
+=pod
+=head2 SPECIFICS
        : Stoplist is initialize inside the script
+       : Used Perl's smartmatch ~~ to determine if a word a stop word
+       : Store TOKEN into a HASH %TOKENHASH
+       : Store No. of terms for each Data file in a HASH %TOTNURMS
 =cut
 
 =pod
