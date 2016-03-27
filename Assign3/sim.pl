@@ -120,20 +120,19 @@ my @DOCTXTID= grep(/^.+.txt$/,readdir($DIR_HANDLE));
 closedir $DIR_HANDLE;
 
 #NUMBER OF DOCUMENT VECTOR
-my $docno=0;
+my $DOCNO=0;
 foreach my $file_name (@DOCTXTID)
 {
-    $docno++;
+    $DOCNO++;
     #on each access of a **.txt file, do below
     readfileto("$LOCDATFIL/$file_name",$file_name);
 }#END foreach
 
 ################################### CREATE TOKEN FROM TERMS IN DATAFILES ###################################
+
 print "\nCreating TOKENS..  \n";
 #INIT PORTER STEMMER
 initialiseporter();
-#HASH FOR UNSTEMMED DATAFILE content, keys will be DATAID
-my %UNSTMDOCHASH;
 #HASH FOR STEMMED DATAFILE content, keys will be DATAID
 my %STMDOCHASH;
 #HASH FOR TOKEN
@@ -146,13 +145,13 @@ my %FLAGGED=();
 #HASH WHICH WILL DETERMINE THE VALUE OF A FREQUENCY, which is CORRELATED to a TOKEN and DOCID
 #This one does not need initialization, initialization happens below (FREQASH..++)
 my %FREQASH=();
-my @arraytxtcatcher=();
 my @arraylinecatcher =();
+my @arraybowcatcher=();
 
 foreach my $dataf (keys %INFILEHASH)
 {
 	#text-body-buffer value return to null;
-	@arraytxtcatcher=();
+	@arraybowcatcher=();
 	#PARSE content of a DATAFILE
 	my @bodyofword = split / /, $INFILEHASH{$dataf};
 	#counter for terms in a document/how many terms in a Document?
@@ -163,41 +162,55 @@ foreach my $dataf (keys %INFILEHASH)
         @arraylinecatcher =();
         #TOTNURMS HASH counter
         $ctr++;
+        
         #perldoc Mistemming.pm
         my $maybewords = mistemming($word);
-        #program will do nothing if $maybewords is UNDEFINED
+        #my prlmodule will do nothing if $maybewords is UNDEFINED, refer to perldoc Mistemming.pm
         if(defined $maybewords)
         { 
-	        #for each word in a word (this iterates if word is hypenated)
+	        #STORE THE TOTAL NO. of TERMS for each DOCUMENT in a HASH;these counts HYPENATED words as 1-term
+            $TOTNURMS{$dataf}=$ctr;
+	        #for each word, in GROUP OF WORDS (this iterates if word is hypenated)
 	        my @maybewords = split / /, $maybewords;
 	        foreach my $word (@maybewords)
-	        {        
-		       #Use TOKEN as key of a HASH, and INITIALIZE its value to defined
-		      
-		           #STORE THE TOTAL NO. of TERMS for each DOCUMENT in a HASH;these are unstemmed and unnormalized
-	               $TOTNURMS{$dataf}=$ctr;
-		           #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
-	               #TOKENS are NORMALIZED terms
-	               my $tok = stem(lc $word);
-		           $FLAGGED{$tok} = defined;
-		           #IF & ELSIF DETERMINES FREQUENCY OF a TOKEN IN THE DOCUMENTS
-	               #DOCUMENT FREQUENCY
-	               if($FLAGGED{$tok} ne $dataf)
-	               {
-	                   $TOKENHASH{$tok}++; 
-	                   $FLAGGED{$tok} = $dataf;
-	               }
-		           push @arraylinecatcher, "$tok";  
+	        {      
+		       #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
+	           #TOKENS are NORMALIZED terms
+	           my $tok = stem(lc $word);
+	           #Use TOKEN as key of FLAG HASH, and INITIALIZE its value to defined
+		       $FLAGGED{$tok} = defined;
+		       #IF & ELSIF DETERMINES FREQUENCY OF a TOKEN IN THE DOCUMENTS
+	           #if not yet FLAGGED , means this is the first time a TOKEN is encountered in this data file
+	           #DOCUMENT FREQUENCY
+	           if($FLAGGED{$tok} ne $dataf)
+	           {
+	               $TOKENHASH{$tok}++; 
+	               $FLAGGED{$tok} = $dataf;
+	               $FREQASH{$tok}{$dataf}++;
+	           }
+	           #ELSIF the same word shows-up in the same data file, increase counter of
+	           #TERM FREQUENCY
+	           elsif($FLAGGED{$tok} eq $dataf)
+               {
+                    #if another instance of the token appeared in a document
+                    $FREQASH{$tok}{$dataf}++;  
+               }
+		       push @arraylinecatcher, "$tok";  
 	        }
-	   push @arraytxtcatcher,"@arraylinecatcher";
+	   push @arraybowcatcher,"@arraylinecatcher";
 	   }#END IF word defined
     }#END for each word in body of word
-    $STMDOCHASH{$dataf} = "@arraytxtcatcher";
+    $STMDOCHASH{$dataf} = "@arraybowcatcher";
 }#END for each datafile
 
-#print Dumper\%TOTNURMS;
-print Dumper\%TOKENHASH;
+########## DEBUGGING TOOLS #############
+
+print Dumper\%TOTNURMS;
+#print Dumper\%TOKENHASH;
+#print Dumper\%FREQASH;
 #print Dumper\%STMDOCHASH;
+
+########## END OF DEBUGGING TOOLS #############
 
 print "\n";
 print "Enter absolute path of Query document> ";
@@ -232,8 +245,10 @@ __END__
 =head2 SPECIFICS
        : Stoplist is initialize inside the script
        : Used Perl's smartmatch ~~ to determine if a word a stop word
+       : HYPHENATED words are treated as group of words
        : Store TOKEN into a HASH %TOKENHASH
        : Store No. of terms for each Data file in a HASH %TOTNURMS
+       : Store Term Frequency matrix of datafiles in a HASH %FREQHASH
 =cut
 
 =pod

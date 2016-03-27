@@ -125,7 +125,7 @@ Version       : 1
         : e.g. string = {[(shell)]}  shell = mistemming(string)
         : It also ignores a word that is a symbol [, +, -, 
         : and single white-space
-        : Substitute HYPHENS, conjunction symbols to spaces
+        : Substitute HYPHENS, conjunction symbols to spaces,
         : So they will be treated as a group of words in MAIN
         : Substitute single-qoutes to NULL
 =cut
