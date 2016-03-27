@@ -77,7 +77,7 @@ sub mistemming
     }#END for
     
 #initialze the stoplist instead of an input file
-my @stoplist = ("the","be","to","and","a","in","that","have","it","for","not","on","with","do","at","from");
+my @stoplist = ("the","be","to","of","and","a","in","that","have","it","for","not","on","with","do","at","from");
 
 #used perl's smartmatching (~~, if matches an element in stoplist 
 #consider stop word irrelevant
@@ -93,11 +93,22 @@ elsif(lc $bow ~~ "-"){return undef}
 elsif(lc $bow ~~ ""){return undef}
 elsif(lc $bow ~~ " "){return undef}
 #END of DO NOTHING-S    
-             
+
+#SUBSTITUTION
+#HYPHEN, back-slash, etc are substituted to spaces
+$bow =~ s/-/ /g;
+$bow =~ s/\// /g;
+$bow =~ s/:/ /g;
+$bow =~ s/\\/ /g;
+$bow =~ s/=/ /g;
+
+#single-qoutes, are substituted to emptyspace
+$bow =~ s/'//g;
+
 return $bow;
 }
 
-66;
+"Mi trabajo";
 __END__
 
 =head1 TITLE
@@ -114,6 +125,9 @@ Version       : 1
         : e.g. string = {[(shell)]}  shell = mistemming(string)
         : It also ignores a word that is a symbol [, +, -, 
         : and single white-space
+        : Substitute HYPHENS, conjunction symbols to spaces
+        : So they will be treated as a group of words in MAIN
+        : Substitute single-qoutes to NULL
 =cut
 
 =pod

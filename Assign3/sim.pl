@@ -132,10 +132,12 @@ foreach my $file_name (@DOCTXTID)
 print "\nCreating TOKENS..  \n";
 #INIT PORTER STEMMER
 initialiseporter();
-#HASH FOR TOKEN
-my %TOKENHASH;
+#HASH FOR UNSTEMMED DATAFILE content, keys will be DATAID
+my %UNSTMDOCHASH;
 #HASH FOR STEMMED DATAFILE content, keys will be DATAID
 my %STMDOCHASH;
+#HASH FOR TOKEN
+my %TOKENHASH;
 #HASH FOR TERMS IN A DATAFILE
 my %TOTNURMS;
 #A HASH to control the increment of tokens in the documents#A HASH to control the increment of tokens in the documents
@@ -147,11 +149,11 @@ my %FREQASH=();
 my @arraytxtcatcher=();
 my @arraylinecatcher =();
 
-
 foreach my $dataf (keys %INFILEHASH)
 {
 	#text-body-buffer value return to null;
 	@arraytxtcatcher=();
+	#PARSE content of a DATAFILE
 	my @bodyofword = split / /, $INFILEHASH{$dataf};
 	#counter for terms in a document/how many terms in a Document?
     my $ctr=0;
@@ -162,33 +164,38 @@ foreach my $dataf (keys %INFILEHASH)
         #TOTNURMS HASH counter
         $ctr++;
         #perldoc Mistemming.pm
-        $word=mistemming($word);
-       
-	    #Use TOKEN as key of a HASH, and INITIALIZE its value to defined
-	    if(defined $word)
-	    { 
-	        #STORE THE TOTAL NO. of TERMS for each DOCUMENT in a HASH;these are unstemmed and unnormalized
-            $TOTNURMS{$dataf}=$ctr;
-	        #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
-            #TOKENS are NORMALIZED terms
-            my $tok = stem(lc $word);
-	        $FLAGGED{$tok} = defined;
-	        #IF & ELSIF DETERMINES FREQUENCY OF a TOKEN IN THE DOCUMENTS
-            #DOCUMENT FREQUENCY
-            if($FLAGGED{$tok} ne $dataf)
-            {
-                $TOKENHASH{$tok}++; 
-                $FLAGGED{$tok} = $dataf;
-            }
-            
-	    push @arraylinecatcher, "$tok";    
-	    }#END IF word defined
-	push @arraytxtcatcher,"@arraylinecatcher";
+        my $maybewords = mistemming($word);
+        #program will do nothing if $maybewords is UNDEFINED
+        if(defined $maybewords)
+        { 
+	        #for each word in a word (this iterates if word is hypenated)
+	        my @maybewords = split / /, $maybewords;
+	        foreach my $word (@maybewords)
+	        {        
+		       #Use TOKEN as key of a HASH, and INITIALIZE its value to defined
+		      
+		           #STORE THE TOTAL NO. of TERMS for each DOCUMENT in a HASH;these are unstemmed and unnormalized
+	               $TOTNURMS{$dataf}=$ctr;
+		           #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
+	               #TOKENS are NORMALIZED terms
+	               my $tok = stem(lc $word);
+		           $FLAGGED{$tok} = defined;
+		           #IF & ELSIF DETERMINES FREQUENCY OF a TOKEN IN THE DOCUMENTS
+	               #DOCUMENT FREQUENCY
+	               if($FLAGGED{$tok} ne $dataf)
+	               {
+	                   $TOKENHASH{$tok}++; 
+	                   $FLAGGED{$tok} = $dataf;
+	               }
+		           push @arraylinecatcher, "$tok";  
+	        }
+	   push @arraytxtcatcher,"@arraylinecatcher";
+	   }#END IF word defined
     }#END for each word in body of word
     $STMDOCHASH{$dataf} = "@arraytxtcatcher";
 }#END for each datafile
 
-print Dumper\%TOTNURMS;
+#print Dumper\%TOTNURMS;
 print Dumper\%TOKENHASH;
 #print Dumper\%STMDOCHASH;
 
