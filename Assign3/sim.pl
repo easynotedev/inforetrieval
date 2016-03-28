@@ -238,7 +238,7 @@ __END__
 =head2 ASSUMPTIONS
        : data files are .txt files
        : location of the query is in a hierarchical file-system
-       : Three input items, are necessary for this program to be graded
+       : Three input items, are necessary for this program to be graded  
 =cut
 
 =pod
