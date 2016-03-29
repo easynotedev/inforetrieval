@@ -54,6 +54,7 @@ use Lib::Mistemming;
 use Lib::Porterstemmer;
 
 
+################################### READ FILE SUB ###################################
 #Read file and put to HASH or
 #if file is query save as query file
 #Manipulates Array DOCID, and Hash INFILEHASH
@@ -61,7 +62,9 @@ use Lib::Porterstemmer;
 my %INFILEHASH;
 #A specific methods happens to the query file
 my $query='';
+my @query=();
 my $notxtquery='';
+
 sub readfileto
 {
     my $PATH = shift;
@@ -85,9 +88,9 @@ sub readfileto
     if($filenm eq $notxtquery)
     {
         $query = $filenm; 
-        $query = "@filedy";
+        @query = @filedy;
     }
-    #if an input file
+    #if a DATA FILE
     #saves the (Array of string / text-body of a file) to the appropriate key in the GlobalHASH
     else
     {
@@ -98,7 +101,7 @@ sub readfileto
 
 ################################### FUN STARTS HERE ###################################
 #shows absolute path
-print "script's path : ";
+print "script's path -> ";
 print abs_path($0)."\n\n";
 
 #negates the new-line char
@@ -128,23 +131,20 @@ foreach my $file_name (@DOCTXTID)
     readfileto("$LOCDATFIL/$file_name",$file_name);
 }#END foreach
 
-################################### CREATE TOKEN FROM TERMS IN DATAFILES ###################################
+################################### DATAFILE CONTENT ITERATION ###################################
 
 print "\nCreating TOKENS..  \n";
 #INIT PORTER STEMMER
 initialiseporter();
 #HASH FOR STEMMED DATAFILE content, keys will be DATAID
 my %STMDOCHASH;
-#HASH FOR TOKEN
+#HASH for storing token values
 my %TOKENHASH;
 #HASH FOR TERMS IN A DATAFILE
 my %TOTNURMS;
-#A HASH to control the increment of tokens in the documents#A HASH to control the increment of tokens in the documents
-my %FLAGGED=();
-# Token frequency buffer of each Document ID
-#HASH WHICH WILL DETERMINE THE VALUE OF A FREQUENCY, which is CORRELATED to a TOKEN and DOCID
-#This one does not need initialization, initialization happens below (FREQASH..++)
-my %FREQASH=();
+#Token frequency buffer of each Data file
+#HASH WHICH WILL DETERMINE THE VALUE OF A FREQUENCY, which is CORRELATED to a TOKEN and DATA FILE
+my %TRMFREQASH=();
 my @arraylinecatcher =();
 my @arraybowcatcher=();
 
@@ -168,49 +168,60 @@ foreach my $dataf (keys %INFILEHASH)
         #my prlmodule will do nothing if $maybewords is UNDEFINED, refer to perldoc Mistemming.pm
         if(defined $maybewords)
         { 
-	        #STORE THE TOTAL NO. of TERMS for each DOCUMENT in a HASH;these counts HYPENATED words as 1-term
-            $TOTNURMS{$dataf}=$ctr;
 	        #for each word, in GROUP OF WORDS (this iterates if word is hypenated)
 	        my @maybewords = split / /, $maybewords;
 	        foreach my $word (@maybewords)
 	        {      
+		       #STORE THE TOTAL NO. of TERMS for each DOCUMENT in a HASH;counts HYPENATED words as a single-term
+               $TOTNURMS{$dataf}=$ctr;
 		       #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
 	           #TOKENS are NORMALIZED terms
 	           my $tok = stem(lc $word);
-	           #Use TOKEN as key of FLAG HASH, and INITIALIZE its value to defined
-		       $FLAGGED{$tok} = defined;
-		       #IF & ELSIF DETERMINES FREQUENCY OF a TOKEN IN THE DOCUMENTS
-	           #if not yet FLAGGED , means this is the first time a TOKEN is encountered in this data file
-	           #DOCUMENT FREQUENCY
-	           if($FLAGGED{$tok} ne $dataf)
-	           {
-	               $TOKENHASH{$tok}++; 
-	               $FLAGGED{$tok} = $dataf;
-	               $FREQASH{$tok}{$dataf}++;
-	           }
-	           #ELSIF the same word shows-up in the same data file, increase counter of
-	           #TERM FREQUENCY
-	           elsif($FLAGGED{$tok} eq $dataf)
-               {
-                    #if another instance of the token appeared in a document
-                    $FREQASH{$tok}{$dataf}++;  
-               }
+	      
+
+	           #TOKEN FREQUENCY   
+	           $TOKENHASH{$tok}++; 
+	           #TERM FREQUENCY   
+	           $TRMFREQASH{$dataf}{$tok}++; 
+               
 		       push @arraylinecatcher, "$tok";  
 	        }
-	   push @arraybowcatcher,"@arraylinecatcher";
+	        push @arraybowcatcher,"@arraylinecatcher";
 	   }#END IF word defined
     }#END for each word in body of word
     $STMDOCHASH{$dataf} = "@arraybowcatcher";
 }#END for each datafile
 
-########## DEBUGGING TOOLS #############
-
-print Dumper\%TOTNURMS;
+########## DEBUGGING TOOLS FOR DATAFILE ITERATION #############
+#print Dumper\%TOTNURMS;
 #print Dumper\%TOKENHASH;
-#print Dumper\%FREQASH;
+open (my $outfile, ">", "output.txt") or die "Can't open a output file : $!";
+print $outfile Dumper\%TRMFREQASH;
+close($outfile);
 #print Dumper\%STMDOCHASH;
 
-########## END OF DEBUGGING TOOLS #############
+################################### TERM FREQUENCIES ITERATION ###################################
+
+#Term Frequency of each Document, to get the euclidean length
+my %TFVAL=();
+#Euclidean Normalized tf values for data files
+my %EUCLILEN=();
+
+print "\nAssigning SCORES..  \n";
+foreach my $dataf (keys %TRMFREQASH)
+{
+    foreach my $tok (keys %{ $TRMFREQASH{$dataf} })
+    {
+        #Component of EUCLIDEAN LENGTH, SUMMATION of tf Squared for a datafile
+        $TFVAL{$dataf} += $TRMFREQASH{$dataf}{$tok} * $TRMFREQASH{$dataf}{$tok};
+        #EUC. NORMALIZED LENGTH = term frequency / EUCLIDEAN LENGTH
+        $EUCLILEN{$dataf}{$tok} = $TRMFREQASH{$dataf}{$tok} / sqrt $TFVAL{$dataf};
+    }
+}
+
+########## DEBUGGING TOOLS TERM FREQ ITERATION #############
+#print Dumper\%TFVAL;
+#print Dumper\%EUCLILEN;
 
 print "\n";
 print "Enter absolute path of Query document> ";
@@ -223,8 +234,38 @@ $notxtquery =~ s/.txt$//;
 $notxtquery =~ s/\s//;  
 
 readfileto($LOCQUEFIL, $query_filenm);
-print $query;
+print @query;
 
+################################### QUERY TERM ITERATION ###################################
+
+my @arrayquerycatcher =();
+
+foreach my $word (@query)
+{
+    my $maybewords = mistemming($word);
+    if(defined $maybewords)
+    { 
+        #for each word, in GROUP OF WORDS (this iterates if word is hypenated)
+        my @maybewords = split / /, $maybewords;
+        foreach my $word (@maybewords)
+        {      
+            my $tf=0;
+            my $idf=0;
+            #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
+            #TOKENS are NORMALIZED terms
+            my $qtok = stem(lc $word);
+            
+            
+            push @arrayquerycatcher, "$qtok";  
+            
+        }
+     }
+}
+
+print Dumper\@arrayquerycatcher;
+
+
+print "\n";
 print "\n";
 print "Number of similar documents to display> ";
 chomp(my $K = <STDIN>);
@@ -243,10 +284,8 @@ __END__
 
 =pod
 =head2 SPECIFICS
-       : Stoplist is initialize inside the script
-       : Used Perl's smartmatch ~~ to determine if a word a stop word
        : HYPHENATED words are treated as group of words
-       : Store TOKEN into a HASH %TOKENHASH
+       : Store TOKEN value correlated to a document, into a HASH %TOKENHASH
        : Store No. of terms for each Data file in a HASH %TOTNURMS
        : Store Term Frequency matrix of datafiles in a HASH %FREQHASH
 =cut
