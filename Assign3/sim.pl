@@ -122,7 +122,7 @@ my @DOCTXTID= grep(/^.+.txt$/,readdir($DIR_HANDLE));
 
 closedir $DIR_HANDLE;
 
-#NUMBER OF DOCUMENT VECTOR
+#NUMBER OF DOCUMENT VECTOR, N-value
 my $DOCNO=0;
 print "\nPARSING DATAFILES..  \n";
 foreach my $file_name (@DOCTXTID)
@@ -151,7 +151,8 @@ initialiseporter();
 ####INIT PORTER STEMMER###
 
 ################################### QUERY TERM ITERATION ###################################
-
+#FREQ HASH OF QUERY DOC terms
+my %QUERIASH;
 my @arrayquerycatcher =();
 my @words = split / /, $query;
 foreach my $word (@words)
@@ -168,21 +169,18 @@ foreach my $word (@words)
             #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
             #TOKENS are NORMALIZED terms
             my $qtok = stem(lc $word);
-            
+            #TERM FREQUENCY OF QUERYTERM
+            $QUERIASH{$qtok}{"tf"}++;
             push @arrayquerycatcher, "$qtok";  
-            
         }
      }
 }
-
-print Dumper\@arrayquerycatcher;
 
 print "\n";
 print "\n";
 print "Number of similar documents to display> ";
 chomp(my $K = <STDIN>);
 printf "K is: %s",$K;
-
 
 ################################### DATAFILE CONTENT ITERATION ###################################
 
@@ -222,7 +220,7 @@ my %STMDOCHASH;
 my %TOKENHASH;
 #Token frequency buffer of each Data file
 #HASH WHICH WILL DETERMINE THE VALUE OF A FREQUENCY, which is CORRELATED to a TOKEN and DATA FILE
-my %TRMFREQASH=();
+my %TRMFREQASH;
 #HASH FOR TERMS IN A DATAFILE
 my %TOTNURMS;
 my @arraylinecatcher =();
@@ -259,13 +257,23 @@ foreach my $dataf (keys %INFILEHASH)
 	           my $tok = stem(lc $word);
                if(defined $FLAGGED{$tok} && $FLAGGED{$tok} ne $dataf)
                {
-	               #TOKEN FREQUENCY   
+	               #DOCUMENT FREQUENCY   
 	               $TOKENHASH{$tok}++; 
+	               #DOCUMENT FREQUENCY OF QUERY TERMS
+	               #if query term is the same us current TOKEN, increment value
+	               my ($qtok) = grep {$tok eq $_} keys %QUERIASH;
+	               if(defined $qtok)
+	               {
+	                   $QUERIASH{$qtok}{"df"}++;
+	               }
+	               elsif(undef $qtok)
+                   {
+                       $QUERIASH{$qtok}{"df"}=0;
+                   }
 	               $FLAGGED{$tok}=$dataf;
                }
 	           #TERM FREQUENCY   
 	           $TRMFREQASH{$dataf}{$tok}++; 
-               
 		       push @arraylinecatcher, "$tok";  
 	        }
 	        push @arraybowcatcher,"@arraylinecatcher";
@@ -276,7 +284,7 @@ foreach my $dataf (keys %INFILEHASH)
 
 ########## DEBUGGING TOOLS FOR DATAFILE ITERATION #############
 #print Dumper\%TOTNURMS;
-#print Dumper\%TOKENHASH;
+print Dumper\%QUERIASH;
 open (my $outfile, ">", "output.txt") or die "Can't open a output file : $!";
 print $outfile Dumper\%TOKENHASH;
 print $outfile "\n";
@@ -285,28 +293,50 @@ close($outfile);
 #print Dumper\%STMDOCHASH;
 
 ################################### TERM FREQUENCIES ITERATION ###################################
-
+my %QUETFIDF;
 #Term Frequency of each Document, to get the euclidean length
-my %TFVAL=();
+my %TFVAL;
 #Euclidean Normalized tf values for data files
-my %EUCLILEN=();
+my %EUCLILEN;
+my %SIMPROD;
 
 print "\nAssigning SCORES..  \n";
-foreach my $dataf (keys %TRMFREQASH)
+foreach my $qtok (keys %QUERIASH)
 {
-    foreach my $tok (keys %{ $TRMFREQASH{$dataf} })
+    print "\n$qtok\t";
+    if(defined $QUERIASH{$qtok}{"df"})
     {
-        #Component of EUCLIDEAN LENGTH, SUMMATION of tf Squared for a datafile
-        $TFVAL{$dataf} += $TRMFREQASH{$dataf}{$tok} * $TRMFREQASH{$dataf}{$tok};
-        #EUC. NORMALIZED LENGTH = term frequency / EUCLIDEAN LENGTH
-        $EUCLILEN{$dataf}{$tok} = $TRMFREQASH{$dataf}{$tok} / sqrt $TFVAL{$dataf};
+    	$QUETFIDF{$qtok} = $QUERIASH{$qtok}{"tf"} * log ($DOCNO / $QUERIASH{$qtok}{"df"});
+    }
+    else
+    {
+        $QUETFIDF{$qtok} = 0;
+    }
+    foreach my $dataf (keys %INFILEHASH)
+    {
+        if(defined $TRMFREQASH{$dataf}{$qtok})
+        {
+            #Component of EUCLIDEAN LENGTH, SUMMATION of tf Squared for a datafile
+            $TFVAL{$dataf} += $TRMFREQASH{$dataf}{$qtok} * $TRMFREQASH{$dataf}{$qtok};
+            #EUC. NORMALIZED LENGTH = term frequency / EUCLIDEAN LENGTH
+            $EUCLILEN{$dataf}{$qtok} = $TRMFREQASH{$dataf}{$qtok} / sqrt $TFVAL{$dataf}; 
+        }
+        else
+        {
+            $EUCLILEN{$dataf}{$qtok} = 0;
+        }
+        my $termproduct = $QUETFIDF{$qtok} * $EUCLILEN{$dataf}{$qtok};
+        print "\n$dataf\t";
+        print $termproduct;
+        $SIMPROD{$dataf} += $termproduct;
     }
 }
 
 ########## DEBUGGING TOOLS TERM FREQ ITERATION #############
+print "\n";
 #print Dumper\%TFVAL;
 #print Dumper\%EUCLILEN;
-
+print Dumper \%SIMPROD;
 
 print "\n";
 system("pause");
