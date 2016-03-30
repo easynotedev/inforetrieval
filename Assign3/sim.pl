@@ -61,8 +61,8 @@ use Lib::Porterstemmer;
 #DOCID is the key of INFILEHASH, without the suffix .txt
 my %INFILEHASH;
 #A specific methods happens to the query file
-my $query='';
-my @query=();
+my $querynm ='';
+my $query = ();
 my $notxtquery='';
 
 sub readfileto
@@ -87,8 +87,8 @@ sub readfileto
     #if QUERY FILE
     if($filenm eq $notxtquery)
     {
-        $query = $filenm; 
-        @query = @filedy;
+        $querynm = $filenm; 
+        $query = "@filedy";
     }
     #if a DATA FILE
     #saves the (Array of string / text-body of a file) to the appropriate key in the GlobalHASH
@@ -124,6 +124,7 @@ closedir $DIR_HANDLE;
 
 #NUMBER OF DOCUMENT VECTOR
 my $DOCNO=0;
+print "\nPARSING DATAFILES..  \n";
 foreach my $file_name (@DOCTXTID)
 {
     $DOCNO++;
@@ -131,20 +132,99 @@ foreach my $file_name (@DOCTXTID)
     readfileto("$LOCDATFIL/$file_name",$file_name);
 }#END foreach
 
+
+print "\n";
+print "Enter absolute path of Query document> ";
+chomp(my $LOCQUEFIL = <STDIN>);
+#stoplist filename
+my $query_filenm = basename($LOCQUEFIL);
+#different to nmeofstoplist,this is for a check in readfile, so stoplist doc does not save to the TOKEN HASH
+$notxtquery = $query_filenm;
+$notxtquery =~ s/.txt$//;
+$notxtquery =~ s/\s//;  
+
+readfileto($LOCQUEFIL, $query_filenm);
+print $query;
+
+####INIT PORTER STEMMER###
+initialiseporter();
+####INIT PORTER STEMMER###
+
+################################### QUERY TERM ITERATION ###################################
+
+my @arrayquerycatcher =();
+my @words = split / /, $query;
+foreach my $word (@words)
+{
+    my $maybewords = mistemming($word);
+    if(defined $maybewords)
+    { 
+        #for each word, in GROUP OF WORDS (this iterates if word is hypenated)
+        my @maybewords = split / /, $maybewords;
+        foreach my $word (@maybewords)
+        {      
+            my $tf=0;
+            my $idf=0;
+            #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
+            #TOKENS are NORMALIZED terms
+            my $qtok = stem(lc $word);
+            
+            push @arrayquerycatcher, "$qtok";  
+            
+        }
+     }
+}
+
+print Dumper\@arrayquerycatcher;
+
+print "\n";
+print "\n";
+print "Number of similar documents to display> ";
+chomp(my $K = <STDIN>);
+printf "K is: %s",$K;
+
+
 ################################### DATAFILE CONTENT ITERATION ###################################
 
 print "\nCreating TOKENS..  \n";
-#INIT PORTER STEMMER
-initialiseporter();
+my %UNSTMWORDHASH;
+#A HASH to control the increment of tokens in the documents
+my %FLAGGED;
+##################### INITIALIZATION ######################
+#initialized flag to defined value foreach TOKEN
+foreach my $dataf (keys %INFILEHASH)
+{
+    my @bodyofword = split / /, $INFILEHASH{$dataf};
+    foreach my $word(@bodyofword)
+    {
+        $UNSTMWORDHASH{lc $word}=defined;
+        my $maybewords = mistemming($word);
+        #my prlmodule will do nothing if $maybewords is UNDEFINED, refer to perldoc Mistemming.pm
+        if(defined $maybewords)
+        { 
+            my @maybewords = split / /, $maybewords;
+            foreach my $word (@maybewords)
+            { 
+                my $tok = stem(lc $word);
+                #DEFINED EACH TOKEN KEY for FLAGGING
+                #needed to stop TOKEN FREQUENCY FROM INCREMENTING
+                $FLAGGED{$tok}=defined;
+            }
+        }
+    }
+}
+
+##################### TOKENIZATION ######################
+#THE FOLLOWING loops has the same dimensions as above
 #HASH FOR STEMMED DATAFILE content, keys will be DATAID
 my %STMDOCHASH;
 #HASH for storing token values
 my %TOKENHASH;
-#HASH FOR TERMS IN A DATAFILE
-my %TOTNURMS;
 #Token frequency buffer of each Data file
 #HASH WHICH WILL DETERMINE THE VALUE OF A FREQUENCY, which is CORRELATED to a TOKEN and DATA FILE
 my %TRMFREQASH=();
+#HASH FOR TERMS IN A DATAFILE
+my %TOTNURMS;
 my @arraylinecatcher =();
 my @arraybowcatcher=();
 
@@ -177,10 +257,12 @@ foreach my $dataf (keys %INFILEHASH)
 		       #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
 	           #TOKENS are NORMALIZED terms
 	           my $tok = stem(lc $word);
-	      
-
-	           #TOKEN FREQUENCY   
-	           $TOKENHASH{$tok}++; 
+               if(defined $FLAGGED{$tok} && $FLAGGED{$tok} ne $dataf)
+               {
+	               #TOKEN FREQUENCY   
+	               $TOKENHASH{$tok}++; 
+	               $FLAGGED{$tok}=$dataf;
+               }
 	           #TERM FREQUENCY   
 	           $TRMFREQASH{$dataf}{$tok}++; 
                
@@ -196,6 +278,8 @@ foreach my $dataf (keys %INFILEHASH)
 #print Dumper\%TOTNURMS;
 #print Dumper\%TOKENHASH;
 open (my $outfile, ">", "output.txt") or die "Can't open a output file : $!";
+print $outfile Dumper\%TOKENHASH;
+print $outfile "\n";
 print $outfile Dumper\%TRMFREQASH;
 close($outfile);
 #print Dumper\%STMDOCHASH;
@@ -223,53 +307,6 @@ foreach my $dataf (keys %TRMFREQASH)
 #print Dumper\%TFVAL;
 #print Dumper\%EUCLILEN;
 
-print "\n";
-print "Enter absolute path of Query document> ";
-chomp(my $LOCQUEFIL = <STDIN>);
-#stoplist filename
-my $query_filenm = basename($LOCQUEFIL);
-#different to nmeofstoplist,this is for a check in readfile, so stoplist doc does not save to the TOKEN HASH
-$notxtquery = $query_filenm;
-$notxtquery =~ s/.txt$//;
-$notxtquery =~ s/\s//;  
-
-readfileto($LOCQUEFIL, $query_filenm);
-print @query;
-
-################################### QUERY TERM ITERATION ###################################
-
-my @arrayquerycatcher =();
-
-foreach my $word (@query)
-{
-    my $maybewords = mistemming($word);
-    if(defined $maybewords)
-    { 
-        #for each word, in GROUP OF WORDS (this iterates if word is hypenated)
-        my @maybewords = split / /, $maybewords;
-        foreach my $word (@maybewords)
-        {      
-            my $tf=0;
-            my $idf=0;
-            #USE PORTER STEMMER to CONVERT the TERM into a TOKEN
-            #TOKENS are NORMALIZED terms
-            my $qtok = stem(lc $word);
-            
-            
-            push @arrayquerycatcher, "$qtok";  
-            
-        }
-     }
-}
-
-print Dumper\@arrayquerycatcher;
-
-
-print "\n";
-print "\n";
-print "Number of similar documents to display> ";
-chomp(my $K = <STDIN>);
-printf "K is: %s",$K;
 
 print "\n";
 system("pause");
