@@ -142,6 +142,7 @@ $notxtquery =~ s/.txt$//;
 $notxtquery =~ s/\s//;  
 
 readfileto($LOCQUEFIL, $query_filenm);
+print "\n";
 print $query;
 
 ####INIT PORTER STEMMER###
@@ -182,7 +183,7 @@ printf "K is: %s",$K;
 
 ################################### DATAFILE CONTENT ITERATION ###################################
 
-print "\nCreating TOKENS..  \n";
+print "\n\nCreating TOKENS..  \n";
 my %UNSTMWORDHASH;
 #A HASH to control the increment of tokens in the documents
 my %FLAGGED;
@@ -337,7 +338,7 @@ print "\n";
 print "\n";
 printf "Showing Most Relevant Documents of degree %s :",$K;
 print "\n";
-print "DATA FILE ID\tSCORES";
+print "DATA FILE ID\t\tSCORES";
 print "\n";
 #SORT THE VALUES
 #USED PERL's SPACE OPERATOR to sort the array float
@@ -348,8 +349,8 @@ print "\n";
 foreach my $dataf ((reverse sort { $SIMPROD{$a} <=> $SIMPROD{$b} } keys %SIMPROD)[0..$K-1])
 {
   
-  print $dataf.".txt";
-  print "\t";
+  print $dataf;
+  print "\t\t";
   print nearest(.0001,$SIMPROD{$dataf});
   print "\n";
 }
