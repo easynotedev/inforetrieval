@@ -344,12 +344,13 @@ print "\n";
 #Here $a and $b, the place-holder variables of sort will always hold 
 #two keys returned by the keys function 
 #and we compare the respective values using the spaceship operator.
-foreach my $dataf (reverse sort { $SIMPROD{$a} <=> $SIMPROD{$b} } keys %SIMPROD)
+#since (sort keys %hash) is a list, we can just take a list slice: by adding [0..$K-1]
+foreach my $dataf ((reverse sort { $SIMPROD{$a} <=> $SIMPROD{$b} } keys %SIMPROD)[0..$K-1])
 {
   
   print $dataf.".txt";
   print "\t";
-  print nearest(.00001,$SIMPROD{$dataf});
+  print nearest(.0001,$SIMPROD{$dataf});
   print "\n";
 }
 print "\n";
