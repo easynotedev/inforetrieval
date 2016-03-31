@@ -348,8 +348,10 @@ print "\n";
 #since (sort keys %hash) is a list, we can just take a list slice: by adding [0..$K-1]
 foreach my $dataf ((reverse sort { $SIMPROD{$a} <=> $SIMPROD{$b} } keys %SIMPROD)[0..$K-1])
 {
-  
-  print $dataf;
+  my $crsname = substr($dataf,0,4); 
+  my $crsno = substr($dataf,4,7);
+  my $datafname = $crsname." ".$crsno;
+  print $datafname;
   print "\t\t";
   print nearest(.0001,$SIMPROD{$dataf});
   print "\n";
