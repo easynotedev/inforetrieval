@@ -1,0 +1,1 @@
+Propositional and predicate logic, mathematical proof techniques, sets, combinatorics, functions and relations, graphs, and graph algorithms. Prerequisites: CSE 1310 and MATH 1426.
