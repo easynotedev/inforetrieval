@@ -1,0 +1,2 @@
+CSE 1325. OBJECT-ORIENTED PROGRAMMING. 3 Hours.
+Object-oriented concepts, basic Unified Modeling Language (UML) modeling, collection classes, generics, polymorphism, reusability, and introduction to design patterns. Projects involve extensive programming and include graphical user interfaces and multithreading. Prerequisite: CSE 1320.

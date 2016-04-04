@@ -1,0 +1,1 @@
+Database system architecture; file structures for databases, including indexing hashing, and B+-trees; the relational model and algebra; the SQL database language; Entity-Relationship data modeling; functional dependencies and basic normalization. Prerequisite: C or better in each of the following: CSE 1325 and CSE 2320.

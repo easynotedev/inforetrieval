@@ -292,14 +292,41 @@ close($outfile);
 #print Dumper\%STMDOCHASH;
 
 ################################### TERM FREQUENCIES ITERATION ###################################
-my %QUETFIDF;
+my %QUETFIDF=();
 #Term Frequency of each Document, to get the euclidean length
-my %TFVAL;
+my %TFVAL=();
 #Euclidean Normalized tf values for data files
-my %EUCLILEN;
-my %SIMPROD;
+my %EUCLILEN=();
+my %SIMPROD=();
 
-print "\nComputing IMPROVED COSINE SIM SCORES..";
+print "\nComputing IMPROVED COSINE SIMILARITY SCORES..";
+##################### INITIALIZATION ######################
+foreach my $qtok (keys %QUERIASH)
+{
+    foreach my $dataf (keys %INFILEHASH)
+    {
+        if(defined $TRMFREQASH{$dataf}{$qtok})
+        {
+            #Component of EUCLIDEAN LENGTH, SUMMATION of tf Squared for a datafile
+            $TFVAL{$dataf} += $TRMFREQASH{$dataf}{$qtok} * $TRMFREQASH{$dataf}{$qtok};
+        }
+        else
+        {
+            $TFVAL{$dataf} += 0;
+        }    
+        if(defined $TRMFREQASH{$dataf}{$qtok} && defined $TFVAL{$dataf} && $TFVAL{$dataf} != 0)
+        {
+              #EUC. NORMALIZED LENGTH = term frequency / EUCLIDEAN LENGTH
+             $EUCLILEN{$dataf}{$qtok} = $TRMFREQASH{$dataf}{$qtok} / sqrt $TFVAL{$dataf}; 
+        }
+        else
+        {
+            $EUCLILEN{$dataf}{$qtok} = 0;
+        }
+    }
+}
+
+##################### CREATING SIMILARITY PRODUCT ######################
 foreach my $qtok (keys %QUERIASH)
 {
     if(defined $QUERIASH{$qtok}{"df"})
@@ -308,21 +335,11 @@ foreach my $qtok (keys %QUERIASH)
     }
     else
     {
-        $QUETFIDF{$qtok} = 0;
+        $QUETFIDF{$qtok} = $QUERIASH{$qtok}{"tf"} * log ($DOCNO / 1);
     }
     foreach my $dataf (keys %INFILEHASH)
     {
-        if(defined $TRMFREQASH{$dataf}{$qtok})
-        {
-            #Component of EUCLIDEAN LENGTH, SUMMATION of tf Squared for a datafile
-            $TFVAL{$dataf} += $TRMFREQASH{$dataf}{$qtok} * $TRMFREQASH{$dataf}{$qtok};
-            #EUC. NORMALIZED LENGTH = term frequency / EUCLIDEAN LENGTH
-            $EUCLILEN{$dataf}{$qtok} = $TRMFREQASH{$dataf}{$qtok} / sqrt $TFVAL{$dataf}; 
-        }
-        else
-        {
-            $EUCLILEN{$dataf}{$qtok} = 0;
-        }
+        
         my $termproduct = $QUETFIDF{$qtok} * $EUCLILEN{$dataf}{$qtok};
         #NET SCORE OF A TERM PRODUCT FOR A DATAFILE
         $SIMPROD{$dataf} += $termproduct;
@@ -338,7 +355,7 @@ print "\n";
 print "\n";
 printf "Showing Most Relevant Documents of degree %s :",$K;
 print "\n";
-print "DATA FILE ID\t\tSCORES";
+print "   DATA FILE ID\t\tSCORES";
 print "\n";
 #SORT THE VALUES
 #USED PERL's SPACE OPERATOR to sort the array float
@@ -346,11 +363,13 @@ print "\n";
 #two keys returned by the keys function 
 #and we compare the respective values using the spaceship operator.
 #since (sort keys %hash) is a list, we can just take a list slice: by adding [0..$K-1]
+my $ctr = 0;
 foreach my $dataf ((reverse sort { $SIMPROD{$a} <=> $SIMPROD{$b} } keys %SIMPROD)[0..$K-1])
 {
   my $crsname = substr($dataf,0,4); 
   my $crsno = substr($dataf,4,7);
   my $datafname = $crsname." ".$crsno;
+  printf "%s. ",++$ctr;
   print $datafname;
   print "\t\t";
   print nearest(.0001,$SIMPROD{$dataf});
