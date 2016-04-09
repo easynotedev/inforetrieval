@@ -55,10 +55,6 @@ use Data::Dumper;
 #Manipulates Array DOCID, and Hash INFILEHASH
 #DOCID is the key of INFILEHASH, without the suffix .txt
 my %INFILEHASH;
-#A specific methods happens to the query file
-my $querynm ='';
-my $query = ();
-my $notxtquery='';
 
 sub readfileto
 {
@@ -79,9 +75,12 @@ sub readfileto
     $filenm =~ s/.txt$//;
     #USED Substitute function to delete whitespace(s/) ->(becomes) null
     $filenm =~ s/\s//;
+    my $crsname = substr($filenm,0,4); 
+    my $crsno = substr($filenm,4,7);
+    my $inptfl = $crsname." ".$crsno;
     #if a DATA FILE
     #saves the (Array of string / text-body of a file) to the appropriate key in the GlobalHASH
-    $INFILEHASH{$filenm} = "@filedy";
+    $INFILEHASH{$inptfl} = "@filedy";
     
 }
 ################################### EOL READ FILE SUB ###################################
@@ -108,7 +107,7 @@ closedir $DIR_HANDLE;
 
 #NUMBER OF DOCUMENT VECTOR, N-value
 my $DOCNO=0;
-print "\nPARSING INPUT FILES..  \n";
+print "\nHASHING INPUT FILES..  \n";
 foreach my $file_name (@DOCTXTID)
 {
     $DOCNO++;
@@ -116,11 +115,37 @@ foreach my $file_name (@DOCTXTID)
     readfileto("$LOCINTFIL/$file_name",$file_name);
 }#END foreach
 
+################################### SOL HASH CONTENT ITERATION ###################################
+my $infhash_keys = qr/${\ join('|', map quotemeta, keys %INFILEHASH) }/;
+print "\nPARSING FILES in HASH..  \n";
+print "\nCreating LINK MATRIX..  \n";
+foreach my $inptfl (keys %INFILEHASH)
+{
+    my $ctr=0;
+    print "\n";
+    print $inptfl;
+    #for each body-of-words / Input file data-content
+    foreach my $bows ($INFILEHASH{$inptfl}) 
+    {
+       while ((my $key) = each %INFILEHASH)
+       {
+       	   if (-1 != index($bows, $key)) 
+       	   {
+       	        if($key ne $inptfl)
+       	        {
+       	        	print "\t";
+                    print ++$ctr;
+                    print " $key";
+       	        }
+       	   }
+       }
+    }
+}
+################################### EOL HASH CONTENT ITERATION ###################################
+
 print "\n";
 print "Enter absolute path of output.txt file> ";
 chomp(my $LOCOUTFIL = <STDIN>);
-#output filename
-my $otpt_flnm = basename($LOCOUTFIL);
 
 print "\n";
 print "Enter Teleport Probability> ";
@@ -158,6 +183,6 @@ __END__
 =cut
 
 =pod
-=head2 Accreditation
+=head2 ACCREDITATIONS
        : 
 =cut
