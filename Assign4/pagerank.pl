@@ -45,7 +45,7 @@ $path = Cwd::abs_path($0);
 #i.e.
 #use lib "C:\\Users\\tuffasspc\\Documents\\perl SCRIPTS\\perl_project\\Lib";
 use Lib File::Spec->catdir(dirname('$path'),'..','Lib');
-
+use Lib::Linker;
 #debugging tool, makes it easier to print ARRAY & HASH
 use Data::Dumper;
 
@@ -105,23 +105,47 @@ opendir my $DIR_HANDLE,"$LOCINTFIL" or die "Unable to open directory : $!";
 my @DOCTXTID= grep(/^.+.txt$/,readdir($DIR_HANDLE));
 closedir $DIR_HANDLE;
 
-#NUMBER OF DOCUMENT VECTOR, N-value
-my $DOCNO=0;
 print "\nHASHING INPUT FILES..  \n";
 foreach my $file_name (@DOCTXTID)
 {
-    $DOCNO++;
     #on each access of a **.txt file, do below
     readfileto("$LOCINTFIL/$file_name",$file_name);
 }#END foreach
 
 ################################### SOL HASH CONTENT ITERATION ###################################
-my $infhash_keys = qr/${\ join('|', map quotemeta, keys %INFILEHASH) }/;
+##################### INITIALIZATION ######################
+my %TOTNUMMATC;
 print "\nPARSING FILES in HASH..  \n";
-print "\nCreating LINK MATRIX..  \n";
 foreach my $inptfl (keys %INFILEHASH)
 {
     my $ctr=0;
+    #for each body-of-words / Input file data-content
+    foreach my $bows ($INFILEHASH{$inptfl}) 
+    {
+       $bows = linker($bows);
+       print "\n";
+       print $bows;
+       while ((my $key) = each %INFILEHASH)
+       {
+           if (-1 != index($bows, $key)) 
+           {
+                if($key ne $inptfl)
+                {
+                   $ctr++;
+                }
+           }
+       }
+    }
+    #denominator for every inputfile match
+    $TOTNUMMATC{$inptfl} = $ctr;
+}
+
+#print Dumper\%TOTNUMMATC;
+##################### MATRICATION ######################
+my $infhash_keys = qr/${\ join('|', map quotemeta, keys %INFILEHASH) }/;
+print "\nCreating LINK MATRIX..  \n";
+foreach my $inptfl (keys %INFILEHASH)
+{
     print "\n";
     print $inptfl;
     #for each body-of-words / Input file data-content
@@ -133,9 +157,8 @@ foreach my $inptfl (keys %INFILEHASH)
        	   {
        	        if($key ne $inptfl)
        	        {
-       	        	print "\t";
-                    print ++$ctr;
-                    print " $key";
+       	          print "\t";
+                  print " $key";
        	        }
        	   }
        }
