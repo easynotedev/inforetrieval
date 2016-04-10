@@ -143,12 +143,11 @@ foreach my $inptfl (keys %INFILEHASH)
 
 print Dumper\%INFILEHASH;
 ##################### MATRICATION ######################
+my %LINKTRIX;
 my $infhash_keys = qr/${\ join('|', map quotemeta, keys %INFILEHASH) }/;
 print "\nCreating LINK MATRIX..  \n";
 foreach my $inptfl (keys %INFILEHASH)
 {
-    print "\n";
-    print $inptfl;
     #for each body-of-words / Input file data-content
     foreach my $bows ($INFILEHASH{$inptfl}) 
     {
@@ -160,13 +159,13 @@ foreach my $inptfl (keys %INFILEHASH)
        	   {
        	        if($key ne $inptfl)
        	        {
-       	          print "\t";
-                  print " $key";
+                  $LINKTRIX{$inptfl}{$key} = 1/$TOTNUMMATC{$inptfl};
        	        }
        	   }
        }
     }
 }
+print Dumper\%LINKTRIX;
 ################################### EOL HASH CONTENT ITERATION ###################################
 
 print "\n";
