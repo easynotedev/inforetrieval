@@ -24,14 +24,12 @@ use strict;
 use warnings;
 use File::Basename;
 use File::Spec;
-#no warnings 'experimental::smartmatch';
-#use experimental 'smartmatch';
+
 #use current working directory
 use Cwd;
 use Cwd 'abs_path';
 #debugging tool, makes it easier to print ARRAY & HASH
 use Data::Dumper;
-#use experimental 'smartmatch';
 no warnings 'experimental::smartmatch';
 
 #The catdir method of the File::Spec module/class can concatenate parts of a file-system path in a platform specific way. 
@@ -52,7 +50,7 @@ use Lib File::Spec->catdir(dirname('$path'),'..','Lib');
 
 use Lib::Mistemming;
 use Lib::Porterstemmer;
-
+use Lib::Round;
 
 ################################### READ FILE SUB ###################################
 #Read file and put to HASH or
@@ -144,6 +142,7 @@ $notxtquery =~ s/.txt$//;
 $notxtquery =~ s/\s//;  
 
 readfileto($LOCQUEFIL, $query_filenm);
+print "\n";
 print $query;
 
 ####INIT PORTER STEMMER###
@@ -184,7 +183,7 @@ printf "K is: %s",$K;
 
 ################################### DATAFILE CONTENT ITERATION ###################################
 
-print "\nCreating TOKENS..  \n";
+print "\n\nCreating TOKENS..  \n";
 my %UNSTMWORDHASH;
 #A HASH to control the increment of tokens in the documents
 my %FLAGGED;
@@ -284,7 +283,7 @@ foreach my $dataf (keys %INFILEHASH)
 
 ########## DEBUGGING TOOLS FOR DATAFILE ITERATION #############
 #print Dumper\%TOTNURMS;
-print Dumper\%QUERIASH;
+#print Dumper\%QUERIASH;
 open (my $outfile, ">", "output.txt") or die "Can't open a output file : $!";
 print $outfile Dumper\%TOKENHASH;
 print $outfile "\n";
@@ -300,10 +299,9 @@ my %TFVAL;
 my %EUCLILEN;
 my %SIMPROD;
 
-print "\nAssigning SCORES..  \n";
+print "\nComputing IMPROVED COSINE SIM SCORES..";
 foreach my $qtok (keys %QUERIASH)
 {
-    print "\n$qtok\t";
     if(defined $QUERIASH{$qtok}{"df"})
     {
     	$QUETFIDF{$qtok} = $QUERIASH{$qtok}{"tf"} * log ($DOCNO / $QUERIASH{$qtok}{"df"});
@@ -326,8 +324,7 @@ foreach my $qtok (keys %QUERIASH)
             $EUCLILEN{$dataf}{$qtok} = 0;
         }
         my $termproduct = $QUETFIDF{$qtok} * $EUCLILEN{$dataf}{$qtok};
-        print "\n$dataf\t";
-        print $termproduct;
+        #NET SCORE OF A TERM PRODUCT FOR A DATAFILE
         $SIMPROD{$dataf} += $termproduct;
     }
 }
@@ -336,8 +333,29 @@ foreach my $qtok (keys %QUERIASH)
 print "\n";
 #print Dumper\%TFVAL;
 #print Dumper\%EUCLILEN;
-print Dumper \%SIMPROD;
+#print Dumper\%SIMPROD;
 
+print "\n";
+printf "Showing Most Relevant Documents of degree %s :",$K;
+print "\n";
+print "DATA FILE ID\t\tSCORES";
+print "\n";
+#SORT THE VALUES
+#USED PERL's SPACE OPERATOR to sort the array float
+#Here $a and $b, the place-holder variables of sort will always hold 
+#two keys returned by the keys function 
+#and we compare the respective values using the spaceship operator.
+#since (sort keys %hash) is a list, we can just take a list slice: by adding [0..$K-1]
+foreach my $dataf ((reverse sort { $SIMPROD{$a} <=> $SIMPROD{$b} } keys %SIMPROD)[0..$K-1])
+{
+  my $crsname = substr($dataf,0,4); 
+  my $crsno = substr($dataf,4,7);
+  my $datafname = $crsname." ".$crsno;
+  print $datafname;
+  print "\t\t";
+  print nearest(.0001,$SIMPROD{$dataf});
+  print "\n";
+}
 print "\n";
 system("pause");
 
