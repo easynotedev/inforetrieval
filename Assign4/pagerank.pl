@@ -115,16 +115,16 @@ foreach my $file_name (@DOCTXTID)
 ################################### SOL HASH CONTENT ITERATION ###################################
 ##################### INITIALIZATION ######################
 my %TOTNUMMATC;
+my @arrayidcatcher;
 print "\nPARSING FILES in HASH..  \n";
 foreach my $inptfl (keys %INFILEHASH)
 {
     my $ctr=0;
+    @arrayidcatcher=();
     #for each body-of-words / Input file data-content
     foreach my $bows ($INFILEHASH{$inptfl}) 
     {
        $bows = linker($bows);
-       print "\n";
-       print $bows;
        while ((my $key) = each %INFILEHASH)
        {
            if (-1 != index($bows, $key)) 
@@ -132,6 +132,7 @@ foreach my $inptfl (keys %INFILEHASH)
                 if($key ne $inptfl)
                 {
                    $ctr++;
+                   $INFILEHASH{$inptfl} = $bows;
                 }
            }
        }
@@ -140,7 +141,7 @@ foreach my $inptfl (keys %INFILEHASH)
     $TOTNUMMATC{$inptfl} = $ctr;
 }
 
-#print Dumper\%TOTNUMMATC;
+print Dumper\%INFILEHASH;
 ##################### MATRICATION ######################
 my $infhash_keys = qr/${\ join('|', map quotemeta, keys %INFILEHASH) }/;
 print "\nCreating LINK MATRIX..  \n";
@@ -153,6 +154,8 @@ foreach my $inptfl (keys %INFILEHASH)
     {
        while ((my $key) = each %INFILEHASH)
        {
+       	   #if there is any match between INPUT FILE CONTENT AND HASH KEY's
+       	   #add to matrix
        	   if (-1 != index($bows, $key)) 
        	   {
        	        if($key ne $inptfl)

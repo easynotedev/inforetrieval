@@ -16,23 +16,91 @@ sub linker
     #$1 is a capture variable, captures anything on a parenthesis
     #i.e. (\w{4}) will equal to MATH, COSC , MTED
     #e.g COSC 1337/1137
-    if($bow =~ /(\w{4})\s\d{4}\//g)
+    print "\n";
+    if($bow =~ /(\w{4})\s\d{4}\//)
     {
-    	print "\n\n";
+    	print "\n";
     	my $crsname = $1;
     	print $crsname;
-    	print "\n\n";
     	$bow =~ s/\// $crsname /g;
     }
-    #e.g. COSC 3191, 3192, 3193
-    elsif($bow =~ /(\w{4})\s\d{4},\s\d{4},\s/g)
+    #e.g MATH 1314, 1324
+    if($bow =~ /(\w{4})\s\d{4},\s\d{4}/)
     {
-    	print "\n\n";
+        print "\n";
         my $crsname = $1;
         print $crsname;
-        print "\n\n";
         $bow =~ s/,/ $crsname/g;
     }
+    #e.g. COSC 3191, 3192, 3193
+    if($bow =~ /(\w{4})\s\d{4},\s\d{4},\s/)
+    {
+    	print "\n";
+        my $crsname = $1;
+        print $crsname;
+        $bow =~ s/,/ $crsname/g;
+    }
+    #e.g. MATH 1324 or 2330
+    if($bow =~ /(\w{4})\s\d{4}\sor\s\d{4}/)
+    {
+        print "\n";
+        my $crsname = $1;
+        print $crsname;
+        $bow =~ s/\sor\s/\s$crsname\s/g;
+    }
+    #e.g. MATH 1314, 1324 or 2330
+    if($bow =~ /(\w{4})\s\d{4},\s\d{4}\sor\s\d{4}/)
+    {
+        print "\n";
+        my $crsname = $1;
+        print $crsname;
+        $bow =~ s/\sor\s/\s$crsname\s/g;
+    }
+    #e.g COSC 5330, 5340, 5350, and 5360
+    if($bow =~ /(\w{4})\s\d{4},\s\d{4},\s\d{4},\sand\s\d{4}/)
+    {
+        print "\n";
+        my $crsname = $1;
+        print $crsname;
+        $bow =~ s/\sand\s/\s$crsname\s/g;
+    }
+    #e.g. MTED 5199-5399
+    if($bow =~ /(\w{4})\s\d{4}-\d{4}:/)
+    {
+        print "\n";
+        my $crsname = $1;
+        print $crsname;
+        $bow =~ s/-/ $crsname /g;
+    }
+    #e.g COSC 4199 - 4399:
+    if($bow =~ /(\w{4})\s\d{4}\s-\s\d{4}:/)
+    {
+        print "\n";
+        my $crsname = $1;
+        print $crsname;
+        $bow =~ s/-/$crsname/g;
+    }
+    #e.g. MATH 5390 & 5391:
+    if($bow =~ /(\w{4})\s\d{4}\s&\s\d{4}:/)
+    {
+        print "\n";
+        my $crsname = $1;
+        print $crsname;
+        $bow =~ s/&/$crsname/g;
+    }
+    print "\n";
+    #deletes all word that are not of regex /w/w/w/w/s/d/d/d/d
+    $bow =~ s/the|be|to|of|and|a|in|it|for|not|on|do|at//g;
+    $bow =~ s/\w{5,99}/ /g;
+        $bow =~ s/(\s\s)/ /g;
+    $bow =~ s/\w{5,99}/ /g;
+        $bow =~ s/(\s\s)/ /g;
+    $bow =~ s/\w{5,99}/ /g;
+        $bow =~ s/(\s\s)/ /g;
+    $bow =~ s/\w{5,99}/ /g;
+    $bow =~ s/(\s\s)/ /g;
+    $bow =~ s/,|:|\.//g;
+    
     return $bow;
 }
 
@@ -51,6 +119,7 @@ Version       : 1
     :Clarify Links, ambigious lines such as , or and /
     :course name are associated with ambigious course number
     :course number which are preceded by , / and or
+    :deletes all word that are not of regex /w/w/w/w/s/d/d/d/d
 =cut
 
 =pod
