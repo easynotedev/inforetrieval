@@ -153,19 +153,30 @@ foreach my $inptfl (keys %INFILEHASH)
     {
        while ((my $key) = each %INFILEHASH)
        {
-       	   #if there is any match between INPUT FILE CONTENT AND HASH KEY's
-       	   #add to matrix
+       	   #if there is any match between INPUT-FILE body-of-word AND HASH KEY's
+       	   #add (1 / TOTAL no of matches) to matrix
        	   if (-1 != index($bows, $key)) 
        	   {
        	        if($key ne $inptfl)
        	        {
-                  $LINKTRIX{$inptfl}{$key} = 1/$TOTNUMMATC{$inptfl};
+                    $LINKTRIX{$inptfl}{$key} = 1/$TOTNUMMATC{$inptfl};
+       	        }
+       	        #do not add matrix value to the if the Link
+       	        #and Input file is the same
+       	        elsif($key eq $inptfl)
+       	        {
+       	        	$LINKTRIX{$inptfl}{$key} = 0;
        	        }
        	   }
+       	   #if not a match add zero to matrix
+       	   else
+           {
+                $LINKTRIX{$inptfl}{$key} = 0;
+           }
        }
     }
 }
-print Dumper\%LINKTRIX;
+#print Dumper\%LINKTRIX;
 ################################### EOL HASH CONTENT ITERATION ###################################
 
 print "\n";
@@ -179,7 +190,8 @@ chomp(my $IT = <STDIN>);
 ###################################  SOL COMPUTING PAGE-RANK  ###################################
 my %PGERNKSCRE;
 my %SUMMATX;
-printf "\nComputing Page Rank with Teleport Probability of %s",$TELEPROB;
+printf "\nComputing Page Rank of degree %s,with Teleport Probability of %s",$IT,$TELEPROB;
+print "\nPlease wait....  \n";
 for (my $i=0; $i <= $IT; $i++) 
 {
 	foreach my $row (keys %INFILEHASH)
@@ -191,16 +203,20 @@ for (my $i=0; $i <= $IT; $i++)
 	    	#scalar keys %HASH returns length of HASH by its keys
 	    	$PGERNKSCRE{$i}{$row} = 1/ scalar keys %INFILEHASH;
 	    }
-	    else
+	    elsif($i > 0)
 	    {
 	       foreach my $col (keys %INFILEHASH)
 	       {
-	          $SUMMATX{$i}{$row} += $LINKTRIX{$row}{$col};    
+	           $SUMMATX{$i}{$row} += $LINKTRIX{$row}{$col};    
 	       }
+	       $PGERNKSCRE{$i}{$row} = ($TELEPROB/scalar keys %INFILEHASH) + (1-$TELEPROB) * ( $SUMMATX{$i}{$row} * $PGERNKSCRE{$i-1}{$row} );
 	    }
-	    #$SUMMATX{$i}{$row} * $PGERNKSCRE{$i-1}{$row};
+
 	}
 }
+#print Dumper\%SUMMATX;
+print Dumper\%PGERNKSCRE;
+print "\nFinish Computing Page Rank scores..\n";
 ###################################  EOL COMPUTING PAGE-RANK  ###################################
 
 print "\n";
@@ -210,7 +226,7 @@ chomp(my $LOCOUTFIL = <STDIN>);
 ###################################  SOL OUTPUTTING  ###################################
 my $cwd = getcwd();
 chdir ($LOCOUTFIL) or die "Unable to open directory : $!";
-print "\nWriting Page Rank scores in output.txt ..\n\n";
+print "\nWriting Page Rank scores in pagerank.out ..\n\n";
 open (my $outfile, ">", "pagerank.out") or die "Can't open the output file : $!";
 printf $outfile "NodeID/NO\tScore\t\t [Iteration = %s]",$IT;
 
@@ -220,19 +236,17 @@ printf $outfile "NodeID/NO\tScore\t\t [Iteration = %s]",$IT;
 #sort will always hold two keys returned by the keys function 
 #and we compare the respective values using the spaceship operator.
 foreach my $inptfl (
-
         sort { $PGERNKSCRE{$IT}{$b->[1]} <=> $PGERNKSCRE{$IT}{$a->[1]} }
         map { my $iterateKey=$_;
         map [$iterateKey, $_], keys %{$PGERNKSCRE{$iterateKey}} } 
         keys %PGERNKSCRE
-
                    ) 
 {
-    printf $outfile "\n%9s\t %.5f", $inptfl->[1], $PGERNKSCRE{$IT}{$inptfl->[1]};
+    printf $outfile "\n%9s\t %10.8f", $inptfl->[1], $PGERNKSCRE{$IT}{$inptfl->[1]};
 }
 
 close($outfile);
-print "\nFinish writing Page Rank scores in output.txt ..\n\n";
+print "\nFinish writing Page Rank scores in pagerank.out ..\n\n";
 chdir($cwd);
 ###################################  EOL OUTPUTTING  ###################################
 print "\n";
