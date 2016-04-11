@@ -12,6 +12,7 @@ Date          : 4/7/2016
 =pod
 
 =head1 DESCRIPTION
+       : Needs perl 5.18.0 <=
        : Compute and output the link probability matrix formed by the documents
        : inputs the teleport probability alpha
        : along with the number of desired iterations
@@ -189,6 +190,8 @@ chomp(my $IT = <STDIN>);
 
 ###################################  SOL COMPUTING PAGE-RANK  ###################################
 my %PGERNKSCRE;
+#$PGERNKSCRE{"tm1"} is P minus time-1
+#$PGERNKSCRE{"it"} is current time
 printf "\nComputing Page Rank of degree %s,with Teleport Probability of %s",$IT,$TELEPROB;
 print "\nPlease wait....  \n";
 for (my $i=0; $i <= $IT; $i++) 
@@ -201,7 +204,8 @@ for (my $i=0; $i <= $IT; $i++)
 	    {
 	    	#probability of time zero is equal to 1/No. of Nodes
 	    	#scalar keys %HASH returns length of HASH by its keys
-	    	$PGERNKSCRE{$i}{$row} = 1/ scalar keys %INFILEHASH;
+	    	$PGERNKSCRE{"it"}{$row} = 1/ scalar keys %INFILEHASH;
+	    	$PGERNKSCRE{"tm1"}{$row} = $PGERNKSCRE{"it"}{$row}; 
 	    }
 	    elsif($i > 0)
 	    {
@@ -209,11 +213,16 @@ for (my $i=0; $i <= $IT; $i++)
 	       {
 	           $SUMMACOLS += $LINKTRIX{$col}{$row};    
 	       }
-	       $PGERNKSCRE{$i}{$row} = ($TELEPROB/scalar keys %INFILEHASH) + (1-$TELEPROB) * ( $SUMMACOLS * $PGERNKSCRE{$i-1}{$row} );
+	       # = (alpha / no of input files) + (1 - alpha) * (SUMMATION of ith column in matrix * score time-minus-one)
+	       $PGERNKSCRE{"it"}{$row} = ($TELEPROB/scalar keys %INFILEHASH) + (1-$TELEPROB) * ( $SUMMACOLS * $PGERNKSCRE{"tm1"}{$row} );
+	       #store score time-minus-one
+	       $PGERNKSCRE{"tm1"}{$row} = $PGERNKSCRE{"it"}{$row}; 
 	    }
 
 	}
 }
+#dispose of temporary hash portion
+$PGERNKSCRE{"tm1"} = ();
 #print Dumper\%PGERNKSCRE;
 print "\nFinish Computing Page Rank scores..\n";
 ###################################  EOL COMPUTING PAGE-RANK  ###################################
@@ -230,20 +239,21 @@ print "\nWriting Page Rank scores in pagerank.out ..\n\n";
 
 open (my $outfile, ">", "pagerank.out") or die "Can't open the output file : $!";
 #print $outfile Dumper\%LINKTRIX;
+#print Dumper\%PGERNKSCRE;
 printf $outfile " No. NodeID/NO\tScore\t\t [Iteration = %s]",$IT;
 #SORT THE VALUES
 #USED PERL's SPACE OPERATOR to sort the %HASH values
 #Here $b and $a, are place-holder variables for INPUT-FILE keys
 #sort will always hold two keys returned by the keys function 
 #and we compare the respective values using the spaceship operator.
-my @positioned = reverse sort { $PGERNKSCRE{$IT}->{$a} <=> $PGERNKSCRE{$IT}->{$b} }  keys %{$PGERNKSCRE{$IT}} ;
+my @positioned = reverse sort { $PGERNKSCRE{"it"}->{$a} <=> $PGERNKSCRE{"it"}->{$b} }  keys %{$PGERNKSCRE{"it"}} ;
 foreach my $inptfl (@positioned)
 {
      printf $outfile "\n";
      printf $outfile "%3d. ",++$ctr;
      printf $outfile $inptfl;
      printf $outfile "\t";
-     printf $outfile "%.5f",$PGERNKSCRE{$IT}{$inptfl};
+     printf $outfile "%.7f",$PGERNKSCRE{"it"}{$inptfl};
 }
 close($outfile);
 print "\nFinish writing Page Rank scores in pagerank.out ..\n\n";
@@ -255,6 +265,7 @@ __END__
 =pod
 =head2 ASSUMPTIONS
        : data files are .txt files
+       : Program will not parse a non.txt file
        : location of the query is in a hierarchical file-system
        : Four input items, are necessary for this program to be graded  
        : 1. Directory containing input files
@@ -265,10 +276,20 @@ __END__
 
 =pod
 =head2 SPECIFICS
-       : 
+       : Used DOC_ID without the .txt prefix, as the Vector name
+       : Used a HASH to store the LINK MATRIX namely %LINTRIX
+       : Used Hashes of Hashes to sort Page-Rank-Score HASH namely %PGERNKSCRE
+       : %PGERNKSCRE has only two subcategory current time and time minus one
+       : Outputs a pagerank.out to specified path
 =cut
-
+=pod
+=head2 LOGS
+       : I wanted to save memory space by only using two subcategory of Hash %PGERNKSCRE
+       : Before this implementation my program was saving all Page-rank-score from time 0 to time T
+       : which is specified by the user.
+       : So i choose to implement good practice by only saving time-1 and current time SCORES
+=cut
 =pod
 =head2 ACCREDITATIONS
-       : 
+       : perl101.org , perldoc.org, perlmaven.com, stackoverflow.com, perlmonks.org
 =cut
