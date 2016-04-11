@@ -104,6 +104,8 @@ Version       : 1
     :Clarify Links, ambigious lines such as , or and /
     :course name are associated with ambigious course number
     :course number which are preceded by , / and or
+    :used substitutition s/<regex>/<expression>/g to match the above
+    :and change it too the expression
     :deletes all word that are not of regex /w/w/w/w/s/d/d/d/d
 =cut
 

@@ -141,10 +141,10 @@ foreach my $inptfl (keys %INFILEHASH)
     $TOTNUMMATC{$inptfl} = $ctr;
 }
 
-print Dumper\%INFILEHASH;
+#print Dumper\%INFILEHASH;
 ##################### MATRICATION ######################
 my %LINKTRIX;
-my $infhash_keys = qr/${\ join('|', map quotemeta, keys %INFILEHASH) }/;
+
 print "\nCreating LINK MATRIX..  \n";
 foreach my $inptfl (keys %INFILEHASH)
 {
@@ -153,24 +153,31 @@ foreach my $inptfl (keys %INFILEHASH)
     {
        while ((my $key) = each %INFILEHASH)
        {
-       	   #if there is any match between INPUT FILE CONTENT AND HASH KEY's
-       	   #add to matrix
+       	   #if there is any match between INPUT-FILE body-of-word AND HASH KEY's
+       	   #add (1 / TOTAL no of matches) to matrix
        	   if (-1 != index($bows, $key)) 
        	   {
        	        if($key ne $inptfl)
        	        {
-                  $LINKTRIX{$inptfl}{$key} = 1/$TOTNUMMATC{$inptfl};
+                    $LINKTRIX{$inptfl}{$key} = 1/$TOTNUMMATC{$inptfl};
+       	        }
+       	        #do not add matrix value to the if the Link
+       	        #and Input file is the same
+       	        elsif($key eq $inptfl)
+       	        {
+       	        	$LINKTRIX{$inptfl}{$key} = 0;
        	        }
        	   }
+       	   #if not a match add zero to matrix
+       	   else
+           {
+                $LINKTRIX{$inptfl}{$key} = 0;
+           }
        }
     }
 }
-print Dumper\%LINKTRIX;
+#print Dumper\%LINKTRIX;
 ################################### EOL HASH CONTENT ITERATION ###################################
-
-print "\n";
-print "Enter absolute path of output.txt file> ";
-chomp(my $LOCOUTFIL = <STDIN>);
 
 print "\n";
 print "Enter Teleport Probability> ";
@@ -178,14 +185,68 @@ chomp(my $TELEPROB = <STDIN>);
 
 print "\n";
 print "Enter Number of iterations> ";
-chomp(my $ITERATE = <STDIN>);
+chomp(my $IT = <STDIN>);
+
+###################################  SOL COMPUTING PAGE-RANK  ###################################
+my %PGERNKSCRE;
+printf "\nComputing Page Rank of degree %s,with Teleport Probability of %s",$IT,$TELEPROB;
+print "\nPlease wait....  \n";
+for (my $i=0; $i <= $IT; $i++) 
+{
+	foreach my $row (keys %INFILEHASH)
+	{
+	    my $SUMMACOLS = 0;
+	    #time zero
+	    if($i == 0)
+	    {
+	    	#probability of time zero is equal to 1/No. of Nodes
+	    	#scalar keys %HASH returns length of HASH by its keys
+	    	$PGERNKSCRE{$i}{$row} = 1/ scalar keys %INFILEHASH;
+	    }
+	    elsif($i > 0)
+	    {
+	       foreach my $col (keys %INFILEHASH)
+	       {
+	           $SUMMACOLS += $LINKTRIX{$col}{$row};    
+	       }
+	       $PGERNKSCRE{$i}{$row} = ($TELEPROB/scalar keys %INFILEHASH) + (1-$TELEPROB) * ( $SUMMACOLS * $PGERNKSCRE{$i-1}{$row} );
+	    }
+
+	}
+}
+#print Dumper\%PGERNKSCRE;
+print "\nFinish Computing Page Rank scores..\n";
+###################################  EOL COMPUTING PAGE-RANK  ###################################
+
+print "\n";
+print "Enter absolute path of pagerank.out, the output-file> ";
+chomp(my $LOCOUTFIL = <STDIN>);
 
 ###################################  SOL OUTPUTTING  ###################################
-chdir ($LOCOUTFIL) or die "Unable to open directory : $!";
-open (my $outfile, ">", "output.txt") or die "Can't open the output file : $!";
-print "\nFinish writing page rank scores in output.txt ..\n\n";
-close($outfile);
 my $cwd = getcwd();
+my $ctr=0;
+chdir ($LOCOUTFIL) or die "Unable to open directory : $!";
+print "\nWriting Page Rank scores in pagerank.out ..\n\n";
+
+open (my $outfile, ">", "pagerank.out") or die "Can't open the output file : $!";
+#print $outfile Dumper\%LINKTRIX;
+printf $outfile " No. NodeID/NO\tScore\t\t [Iteration = %s]",$IT;
+#SORT THE VALUES
+#USED PERL's SPACE OPERATOR to sort the %HASH values
+#Here $b and $a, are place-holder variables for INPUT-FILE keys
+#sort will always hold two keys returned by the keys function 
+#and we compare the respective values using the spaceship operator.
+my @positioned = reverse sort { $PGERNKSCRE{$IT}->{$a} <=> $PGERNKSCRE{$IT}->{$b} }  keys %{$PGERNKSCRE{$IT}} ;
+foreach my $inptfl (@positioned)
+{
+     printf $outfile "\n";
+     printf $outfile "%3d. ",++$ctr;
+     printf $outfile $inptfl;
+     printf $outfile "\t";
+     printf $outfile "%.5f",$PGERNKSCRE{$IT}{$inptfl};
+}
+close($outfile);
+print "\nFinish writing Page Rank scores in pagerank.out ..\n\n";
 chdir($cwd);
 ###################################  EOL OUTPUTTING  ###################################
 print "\n";
