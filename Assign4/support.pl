@@ -108,7 +108,7 @@ foreach my $inptfl (
         keys %PGERNKSCRE
                    ) 
 {
-    printf "\n%9s\t %10.8f", $inptfl->[1], $PGERNKSCRE{$IT}{$inptfl->[1]};
+    printf $outfile "\n%9s\t %10.8f", $inptfl->[1], $PGERNKSCRE{$IT}{$inptfl->[1]};
 }
 
 

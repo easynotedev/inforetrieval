@@ -189,13 +189,13 @@ chomp(my $IT = <STDIN>);
 
 ###################################  SOL COMPUTING PAGE-RANK  ###################################
 my %PGERNKSCRE;
-my %SUMMATX;
 printf "\nComputing Page Rank of degree %s,with Teleport Probability of %s",$IT,$TELEPROB;
 print "\nPlease wait....  \n";
 for (my $i=0; $i <= $IT; $i++) 
 {
 	foreach my $row (keys %INFILEHASH)
 	{
+	    my $SUMMACOLS = 0;
 	    #time zero
 	    if($i == 0)
 	    {
@@ -207,15 +207,14 @@ for (my $i=0; $i <= $IT; $i++)
 	    {
 	       foreach my $col (keys %INFILEHASH)
 	       {
-	           $SUMMATX{$i}{$row} += $LINKTRIX{$row}{$col};    
+	           $SUMMACOLS += $LINKTRIX{$col}{$row};    
 	       }
-	       $PGERNKSCRE{$i}{$row} = ($TELEPROB/scalar keys %INFILEHASH) + (1-$TELEPROB) * ( $SUMMATX{$i}{$row} * $PGERNKSCRE{$i-1}{$row} );
+	       $PGERNKSCRE{$i}{$row} = ($TELEPROB/scalar keys %INFILEHASH) + (1-$TELEPROB) * ( $SUMMACOLS * $PGERNKSCRE{$i-1}{$row} );
 	    }
 
 	}
 }
-#print Dumper\%SUMMATX;
-print Dumper\%PGERNKSCRE;
+#print Dumper\%PGERNKSCRE;
 print "\nFinish Computing Page Rank scores..\n";
 ###################################  EOL COMPUTING PAGE-RANK  ###################################
 
@@ -225,26 +224,27 @@ chomp(my $LOCOUTFIL = <STDIN>);
 
 ###################################  SOL OUTPUTTING  ###################################
 my $cwd = getcwd();
+my $ctr=0;
 chdir ($LOCOUTFIL) or die "Unable to open directory : $!";
 print "\nWriting Page Rank scores in pagerank.out ..\n\n";
-open (my $outfile, ">", "pagerank.out") or die "Can't open the output file : $!";
-printf $outfile "NodeID/NO\tScore\t\t [Iteration = %s]",$IT;
 
+open (my $outfile, ">", "pagerank.out") or die "Can't open the output file : $!";
+#print $outfile Dumper\%LINKTRIX;
+printf $outfile " No. NodeID/NO\tScore\t\t [Iteration = %s]",$IT;
 #SORT THE VALUES
 #USED PERL's SPACE OPERATOR to sort the %HASH values
 #Here $b and $a, are place-holder variables for INPUT-FILE keys
 #sort will always hold two keys returned by the keys function 
 #and we compare the respective values using the spaceship operator.
-foreach my $inptfl (
-        sort { $PGERNKSCRE{$IT}{$b->[1]} <=> $PGERNKSCRE{$IT}{$a->[1]} }
-        map { my $iterateKey=$_;
-        map [$iterateKey, $_], keys %{$PGERNKSCRE{$iterateKey}} } 
-        keys %PGERNKSCRE
-                   ) 
+my @positioned = reverse sort { $PGERNKSCRE{$IT}->{$a} <=> $PGERNKSCRE{$IT}->{$b} }  keys %{$PGERNKSCRE{$IT}} ;
+foreach my $inptfl (@positioned)
 {
-    printf $outfile "\n%9s\t %10.8f", $inptfl->[1], $PGERNKSCRE{$IT}{$inptfl->[1]};
+     printf $outfile "\n";
+     printf $outfile "%3d. ",++$ctr;
+     printf $outfile $inptfl;
+     printf $outfile "\t";
+     printf $outfile "%.5f",$PGERNKSCRE{$IT}{$inptfl};
 }
-
 close($outfile);
 print "\nFinish writing Page Rank scores in pagerank.out ..\n\n";
 chdir($cwd);
