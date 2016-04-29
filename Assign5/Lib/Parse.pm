@@ -18,7 +18,8 @@ sub parse
 	### TREAT IT AS A SINGLE TERM/WORD ###
 	#e.g. e-mail
 	my @matches = ($string =~ m/(\w{8}\s\d,\s\d{4})/ig);
-    $ANSHASH{$string} = scalar @matches;
+    print @matches;
+    $ANSHASH{$1} = scalar @matches;
     
     return %ANSHASH;
 
