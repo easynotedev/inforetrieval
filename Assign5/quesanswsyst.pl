@@ -50,8 +50,33 @@ $path = Cwd::abs_path($0);
 #i.e.
 #use lib "C:\\Users\\tuffasspc\\Documents\\perl SCRIPTS\\perl_project\\Lib";
 use Lib File::Spec->catdir(dirname('$path'),'..','Lib');
+use Lib::Readtoarray;
+use Lib::Parse;
 #debugging tool, makes it easier to print ARRAY & HASH
 use Data::Dumper;
+
+
+###################################   SOL FUN STARTS  ###################################
+my %ANSHASH;
+print "Ask me a date in history: ";
+chomp(my $QUERY = <STDIN>);
+print "\n";
+
+#shows absolute path
+print "script's path -> ";
+print abs_path($0)."\n\n";
+
+#negates the new-line char
+print "Enter absolute path of input files> ";
+chomp(my $LOCINTFIL = <STDIN>);
+my @inptdy = readtoarray($LOCINTFIL);
+print @inptdy;
+my $line = "@inptdy";
+print "\n"; 
+my %ANSHASHMAIN = parse($line);
+print "\n"; 
+print Dumper \%ANSHASHMAIN;
+####################################   EOL FUN ENDS  ####################################
 
 print "\n";
 system("pause");
