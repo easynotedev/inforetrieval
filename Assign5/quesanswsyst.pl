@@ -58,10 +58,8 @@ use Data::Dumper;
 
 ###################################   SOL FUN STARTS  ###################################
 my %ANSHASH;
-print "Ask me a date in history: ";
-chomp(my $QUERY = <STDIN>);
-print "\n";
 
+print "\n";
 #shows absolute path
 print "script's path -> ";
 print abs_path($0)."\n\n";

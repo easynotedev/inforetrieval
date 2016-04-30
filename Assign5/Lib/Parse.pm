@@ -12,12 +12,13 @@ our @EXPORT = qw(parse);
 #destroys casings
 sub parse
 {
+    #my @month ("January","February","March","April","May","June","July","August","September","October","November","December");
     my %ANSHASH;
     my $string = shift;
-	#if word has e-m, do no substitute symbol to space
-	### TREAT IT AS A SINGLE TERM/WORD ###
-	#e.g. e-mail
-	my @matches = ($string =~ m/(\w{8}\s\d,\s\d{4})/ig);
+	#e.g. February 4, 2004
+	#(January|February|March|April|May|June|July|August|September|October|November|December)
+	my @matches = ($string =~ m/((?:January|February)\s\d,\s\d{4})/ig);
+
     print @matches;
     $ANSHASH{$1} = scalar @matches;
     
