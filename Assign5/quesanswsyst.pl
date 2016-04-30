@@ -66,13 +66,22 @@ print abs_path($0)."\n\n";
 print "Enter absolute path of input files> ";
 chomp(my $LOCINTFIL = <STDIN>);
 my @inptdy = readtoarray($LOCINTFIL);
+print "\n";
+print "\n"; 
+print "Input-File -> Text Body:";
+print "\n";
+print "\n"; 
+print "\t"; 
 print @inptdy;
 my $line = "@inptdy";
 print "\n"; 
 my %ANSHASHMAIN = parse($line);
-print "\n"; 
 
 #print Dumper \%ANSHASHMAIN;
+print "\n";
+print "Showing Top Three dates :";
+print "\n";
+print " No. Date\t\tFrequency";
 
 my $ctr;
 foreach my $date ((reverse sort { $ANSHASHMAIN{$a} <=> $ANSHASHMAIN{$b} } keys %ANSHASHMAIN)[0..2])
