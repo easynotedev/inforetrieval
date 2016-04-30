@@ -2,7 +2,7 @@ package Lib::Parse;
 require 5.006;
 
 use strict;
-no warnings;
+use warnings;
 
 use Exporter qw(import);
 
@@ -36,10 +36,14 @@ sub parse
 	
 	while($string =~ m/(((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d,\s\d{4})|((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{2},\s\d{4})|((?:January|February|March|April|May|June|July|August|September|October|November|December)\s\d{2},\s\d{4})|((?:January|February|March|April|May|June|July|August|September|October|November|December)\s\d,\s\d{4})|([0-9]{1}[0-2]?-\d{2}-\d{4})|(\s[0-9]{1}[0-2]?\/\d{2}\/\d{4}))/ig) 
 	{
+		if($1)
+		{
+			
+		}
 		
 		# $1 is the embodiment of the matched expression
 		# $1 because the key 
-		# value of a key is it's Frequency
+		# value of a key is it's Frequency		
 		$ANSHASH{$1}+=1;
 	}
 	
@@ -50,7 +54,7 @@ log exp 1;
 __END__
 
 =head1 TITLE
-Name          : parse.pl
+Name          : Parse.pm
 Author        : Antonin Karlo M. Tilaon
 Version       : 1
 =cut

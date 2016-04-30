@@ -1,5 +1,5 @@
 package Lib::Readtoarray;
-#require 5.006;
+require 5.006;
 
 use strict;
 use warnings;
