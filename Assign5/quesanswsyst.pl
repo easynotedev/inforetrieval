@@ -55,10 +55,8 @@ use Lib::Parse;
 #debugging tool, makes it easier to print ARRAY & HASH
 use Data::Dumper;
 
-
 ###################################   SOL FUN STARTS  ###################################
 my %ANSHASH;
-
 print "\n";
 #shows absolute path
 print "script's path -> ";
@@ -73,7 +71,19 @@ my $line = "@inptdy";
 print "\n"; 
 my %ANSHASHMAIN = parse($line);
 print "\n"; 
-print Dumper \%ANSHASHMAIN;
+
+#print Dumper \%ANSHASHMAIN;
+
+my $ctr;
+foreach my $date ((reverse sort { $ANSHASHMAIN{$a} <=> $ANSHASHMAIN{$b} } keys %ANSHASHMAIN)[0..2])
+{
+     printf "\n";
+     printf "%3d. ",++$ctr;
+     printf $date;
+     printf "\t";
+     printf "%s",$ANSHASHMAIN{$date};
+}
+print "\n";
 ####################################   EOL FUN ENDS  ####################################
 
 print "\n";

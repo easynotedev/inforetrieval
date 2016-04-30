@@ -22,16 +22,16 @@ sub parse
 	# it also has an outer parathesis to consolidate all of the inside parathesis, these are divided by | ORS
 	# ILLUSTRATION
 	
-	# match -> m/ ( (inside exp)| (inside exp) | (..) | .. ) /ig <- match any cases and global
+	# match -> m/ ( (first inside exp) | (second inside exp) | (third ..) | .. ) /ig <- match any cases and global
 	
 	# used \s <- Match whitespace character
 	#	   \d <- Match a digit
 	#      \d{4} <- Match 4 consecutive digits
 	# Below are the Collection of inside expressions
-	# first parathesized expression matches e.g. Apr 9, 2023
-	# second parathesized expression matches e.g. Jul 25, 2007
-	# third parathesized expression matches e.g. April 24, 1854
-	# fourth parathesized expression matches e.g. February 4, 2004
+	# first inside expression matches e.g. Apr 9, 2023
+	# second inside expression matches e.g. Jul 25, 2007
+	# third inside expression matches e.g. April 24, 1854
+	# fourth inside expression matches e.g. February 4, 2004
 	# Creating spaces inside the regular expression will create errors
 	
 	while($string =~ m/(((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d,\s\d{4})|((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{2},\s\d{4})|((?:January|February|March|April|May|June|July|August|September|October|November|December)\s\d{2},\s\d{4})|((?:January|February|March|April|May|June|July|August|September|October|November|December)\s\d,\s\d{4}))/ig) 
