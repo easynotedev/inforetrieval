@@ -89,7 +89,7 @@ foreach my $date ((reverse sort { $ANSHASHMAIN{$a} <=> $ANSHASHMAIN{$b} } keys %
      printf "\n";
      printf "%3d. ",++$ctr;
      printf $date;
-     printf "\t";
+     printf "\t\t";
      printf "%s",$ANSHASHMAIN{$date};
 }
 print "\n";

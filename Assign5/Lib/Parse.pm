@@ -34,8 +34,9 @@ sub parse
 	# fourth inside expression matches e.g. February 4, 2004
 	# Creating spaces inside the regular expression will create errors
 	
-	while($string =~ m/(((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d,\s\d{4})|((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{2},\s\d{4})|((?:January|February|March|April|May|June|July|August|September|October|November|December)\s\d{2},\s\d{4})|((?:January|February|March|April|May|June|July|August|September|October|November|December)\s\d,\s\d{4}))/ig) 
+	while($string =~ m/(((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d,\s\d{4})|((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{2},\s\d{4})|((?:January|February|March|April|May|June|July|August|September|October|November|December)\s\d{2},\s\d{4})|((?:January|February|March|April|May|June|July|August|September|October|November|December)\s\d,\s\d{4})|([0-9]{1}[0-2]?-\d{2}-\d{4})|(\s[0-9]{1}[0-2]?\/\d{2}\/\d{4}))/ig) 
 	{
+		
 		# $1 is the embodiment of the matched expression
 		# $1 because the key 
 		# value of a key is it's Frequency
